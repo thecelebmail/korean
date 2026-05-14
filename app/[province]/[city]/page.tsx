@@ -1,5 +1,7 @@
 // app/[province]/[city]/page.tsx
 import { createClient } from '@/lib/supabase/server'
+import { FlagTriangleRight } from 'lucide-react'
+import { Star } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function CityPage({
@@ -35,8 +37,8 @@ export default async function CityPage({
             className="rounded-xl border p-4 hover:shadow"
           >
             <h3 className="font-bold">{b.name}</h3>
-            <p className="text-sm text-gray-600">{b.address}</p>
-            <p className="text-sm">⭐ {b.rating}</p>
+            <p className="text-sm text-gray-600"><FlagTriangleRight className="inline-block" /> {b.address}</p>
+            <p className="text-sm"><Star className="inline-block fill-yellow-400 text-yellow-400" /> {b.rating}</p>
           </Link>
         ))}
       </div>

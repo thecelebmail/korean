@@ -1,6 +1,6 @@
-// components/layout/Navbar.tsx
+import  SearchBar  from "@/components/search/HeroSearch";
 import Link from "next/link";
-import { Menu, Phone } from "lucide-react";
+
 
 export function Navbar() {
   return (
@@ -28,6 +28,7 @@ export function Navbar() {
             <Link href="/brands" className="hover:text-orange-600 transition-colors">
               Brands
             </Link>
+            <SearchBar />
           </nav>
 
           {/* CTA */}
