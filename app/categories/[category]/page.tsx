@@ -1,6 +1,6 @@
-// app/categories/[category]/page.tsx
 
 import { createClient } from '@/lib/supabase/server'
+import { MapPin, Star } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -56,12 +56,12 @@ export default async function CategoryPage({
               {business.name}
             </h2>
 
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600"><MapPin className="inline-block w-4 h-4 text-gray-400"  />
               {business.address}
             </p>
 
-            <p className="mt-2 text-sm">
-              ⭐ {business.rating ?? 'No rating'}
+            <p className="mt-2 text-sm"><Star className="inline-block w-4 h-4 text-yellow-400"  />
+               {business.rating ?? 'No rating'}
             </p>
           </Link>
         ))}

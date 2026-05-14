@@ -27,7 +27,7 @@ export default async function ProvincePage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="text-4xl font-bold">
-        Motor Spares in {province.replace(/-/g, ' ')}
+        Korean Motor Spares {province.replace(/-/g, ' ')}
       </h1>
 
       <p className="mt-4 text-gray-600">

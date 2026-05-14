@@ -10,10 +10,10 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-orange-600 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-sm">MS</span>
+              <span className="text-white font-bold text-sm">KMS</span>
             </div>
             <span className="font-bold text-stone-900 text-lg leading-tight">
-              Motor<span className="text-orange-600">Spares</span>
+              Korean<span className="text-orange-600">MotorSpares</span>NearMe
             </span>
           </Link>
 
@@ -44,6 +44,12 @@ export function Navbar() {
               className="bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
             >
               Claim Listing
+            </Link>
+             <Link
+              href="/contact-us"
+              className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-orange-600 hover:text-orange-700"
+            >
+              Contact Us
             </Link>
           </div>
         </div>
