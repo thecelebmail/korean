@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { FlagTriangleRight } from 'lucide-react'
-import { Star } from 'lucide-react'
+import { MapPin, Star } from 'lucide-react'
+
 
 export default function BusinessCard({ business }: any) {
   return (
@@ -10,7 +10,7 @@ export default function BusinessCard({ business }: any) {
         <h3>{business.name}</h3>
       </Link>
 
-      <p><FlagTriangleRight className="inline-block" /> {business.address}</p>
+      <p><MapPin className="inline-block" /> {business.address}</p>
 
       <p> <Star className="inline-block fill-yellow-400 text-yellow-400" /> {business.rating}</p>
     </div>

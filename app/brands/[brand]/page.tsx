@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { MapPin, Star } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -55,11 +56,12 @@ export default async function BrandPage({
             </h2>
 
             <p className="text-sm text-gray-600">
+              <MapPin className="inline-block" /> 
               {business.address}
             </p>
 
             <p className="mt-2 text-sm">
-              ⭐ {business.rating ?? 'No rating'}
+              <Star className="inline-block fill-yellow-400 text-yellow-400" /> {business.rating ?? 'No rating'}
             </p>
           </Link>
         ))}

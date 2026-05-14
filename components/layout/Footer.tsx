@@ -19,7 +19,7 @@ export function Footer() {
             </div>
             <p className="text-sm text-stone-400 leading-relaxed">
               South Africa&apos;s largest directory of motor spares suppliers.
-              Find Toyota, BMW, VW, Ford and truck spares near you.
+              Find Kia, Hyndai, VW, Toyota and many more spares near you.
             </p>
           </div>
 

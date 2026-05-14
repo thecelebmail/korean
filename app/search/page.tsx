@@ -1,7 +1,12 @@
-// app/search/page.tsx
+import Link from 'next/link'
 
 import { searchBusinesses } from '@/lib/queries/businesses'
-import { Search } from 'lucide-react'
+
+import {
+  MapPin,
+  Search,
+  Star,
+} from 'lucide-react'
 
 export default async function SearchPage({
   searchParams,
@@ -43,22 +48,34 @@ export default async function SearchPage({
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {results.data.map((business) => (
-            <div
+            <Link
               key={business.id}
-              className="rounded-xl border p-4 transition hover:shadow"
+              href={`/listings/${business.slug}`}
+              className="rounded-xl border p-4 transition hover:shadow hover:border-black block"
             >
+              {/* Name */}
               <h2 className="text-lg font-semibold">
                 {business.name}
               </h2>
 
-              <p className="text-sm text-gray-600">
-                {business.address}
+              {/* Address */}
+              <p className="mt-2 flex items-start gap-2 text-sm text-gray-600">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+
+                <span>
+                  {business.address}
+                </span>
               </p>
 
-              <p className="mt-2 text-sm">
-                ⭐ {business.rating ?? 'No rating'}
+              {/* Rating */}
+              <p className="mt-3 flex items-center gap-2 text-sm">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+
+                <span>
+                  {business.rating ?? 'No rating'}
+                </span>
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       )}
