@@ -25,38 +25,50 @@ export async function getNearbyBusinesses(
     .limit(limit)
 
   if (error) {
-    console.error(error)
+    console.error('getNearbyBusinesses error:', error)
     return []
   }
 
   return data || []
 }
 
-export async function searchBusinesses({ q }: { q?: string }) {
+export async function searchBusinesses({
+  q,
+}: {
+  q?: string
+}) {
   const supabase = await createClient()
 
-  let query = supabase
-    .from('businesses')
-    .select('*')
-    .order('rating', { ascending: false })
+  let query = supabase.from('businesses').select('*')
 
-  if (q && q.trim()) {
-    const term = q.trim()
+  if (q && q.trim() !== '') {
+    const terms = q
+      .toLowerCase()
+      .split(/\s+/) // split by spaces
+      .filter(Boolean)
 
-    query = query.or(
-      [
+    const orParts: string[] = []
+
+    terms.forEach((term) => {
+      orParts.push(
         `name.ilike.%${term}%`,
+        `address.ilike.%${term}%`,
         `city.ilike.%${term}%`,
         `province.ilike.%${term}%`,
-        `address.ilike.%${term}%`,
-      ].join(',')
-    )
+        `slug.ilike.%${term}%`
+      )
+    })
+
+    query = query.or(orParts.join(','))
   }
 
-  const { data, error } = await query
+  const { data, error } = await query.order('rating', {
+    ascending: false,
+  })
 
   if (error) {
-    console.error('search error:', error)
+    console.error('searchBusinesses error:', error)
+
     return { data: [] }
   }
 

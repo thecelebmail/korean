@@ -19,7 +19,7 @@ export function Navbar() {
               alt="Korean Motor Spares"
               width={200}
               height={100}
-              className="object-cover"
+              className="h-auto w-auto object-cover"
               priority
             />
           </div>
