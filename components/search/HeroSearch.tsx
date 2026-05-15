@@ -20,7 +20,7 @@ export default function SearchBar() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search Korean Spares..."
+        placeholder="Search Spares..."
         className="border px-3 py-2 rounded w-full"
       />
 
