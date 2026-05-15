@@ -1,7 +1,34 @@
-// app/[province]/[city]/page.tsx
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { Star, MapPin } from 'lucide-react'
 import Link from 'next/link'
+
+// ✅ Add this metadata function
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ province: string; city: string }>
+}): Promise<Metadata> {
+  const { province, city } = await params
+  
+  const cityName = city.replace(/-/g, ' ')
+  const provinceName = province.replace(/-/g, ' ')
+
+  return {
+    title: `Korean Motor Spares in ${cityName}, ${provinceName} | Best Auto Parts`,
+    description: `Discover ${cityName}'s top Korean motor spares suppliers. Quality Hyundai, Kia, and Korean auto parts in ${cityName}, ${provinceName}. Get quotes and directions.`,
+    keywords: `${cityName} Korean spares, motor parts ${cityName}, auto spares ${cityName}, ${provinceName} car parts, Korean auto parts near me`,
+    alternates: {
+      canonical: `https://koreanmotorsparesnearme.co.za/${province}/${city}`,
+    },
+    openGraph: {
+      title: `Korean Motor Spares in ${cityName}, ${provinceName}`,
+      description: `Find trusted motor spares suppliers in ${cityName}. Compare prices and read customer reviews.`,
+      url: `https://koreanmotorspares.co.za/${province}/${city}`,
+      type: 'website',
+    },
+  }
+}
 
 export default async function CityPage({
   params,
@@ -25,7 +52,7 @@ export default async function CityPage({
       </h1>
 
       <p className="mt-4 text-gray-600">
-        Korean Motor Spares and other spares Suppliers in {city.replace(/-/g, ' ')}, {province.replace(/-/g, ' ')}
+        Korean Motor Spares and other spare suppliers in {city.replace(/-/g, ' ')}, {province.replace(/-/g, ' ')}
       </p>
 
       <div className="mt-10 grid gap-6 md:grid-cols-3">

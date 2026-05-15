@@ -72,7 +72,6 @@ export function Footer() {
                 { label: "Claim a Listing", href: "/claim-business" },
                 { label: "All Categories", href: "/categories" },
                 { label: "All Brands", href: "/brands" },
-                { label: "Search", href: "/search" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

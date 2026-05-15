@@ -1,5 +1,37 @@
 import { createClient } from '@/lib/supabase/server'
 
+export async function getNearbyBusinesses(
+  city: string,
+  province: string,
+  currentSlug: string,
+  limit = 6
+) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('businesses')
+    .select(`
+      id,
+      name,
+      slug,
+      address,
+      city,
+      province,
+      rating
+    `)
+    .eq('city', city)
+    .eq('province', province)
+    .neq('slug', currentSlug)
+    .limit(limit)
+
+  if (error) {
+    console.error(error)
+    return []
+  }
+
+  return data || []
+}
+
 export async function searchBusinesses({ q }: { q?: string }) {
   const supabase = await createClient()
 

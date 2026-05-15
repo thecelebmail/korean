@@ -5,25 +5,43 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://koreanmotorsparesnearme.co.za'),
+
   title: {
-    default: "Motor Spares Near Me South Africa | Used & New Auto Parts",
-    template: "%s | Motor Spares SA",
+    default: 'Korean Motor Spares South Africa',
+    template: '%s | Korean Motor Spares',
   },
+
   description:
-    "Find trusted motor spares suppliers in South Africa including Toyota, BMW, VW, Ford and truck spares. Search by city, category or brand.",
+    'Find Korean motor spares suppliers across South Africa including Hyundai, Kia, Daewoo and SsangYong spares.',
+
   keywords: [
-    "motor spares",
-    "auto parts south africa",
-    "used car parts",
-    "motor spares near me",
+    'korean motor spares',
+    'korean motor spares near me',
+    'hyundai spares',
+    'kia spares',
+    'bumper to bumper',
+    'auto spares south africa',
   ],
-  openGraph: {
-    type: "website",
-    locale: "en_ZA",
-    url: "https://motorsparesnearme.co.za",
-    siteName: "Motor Spares SA",
+
+  alternates: {
+    canonical: '/',
   },
-};
+
+  openGraph: {
+    title: 'Korean Motor Spares',
+    description:
+      'Find trusted Korean motor spares suppliers near you.',
+    url: 'https://koreanmotorsparesnearme.co.za',
+    siteName: 'Korean Motor Spares',
+    type: 'website',
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
 
 export default function RootLayout({
   children,

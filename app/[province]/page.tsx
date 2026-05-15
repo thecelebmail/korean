@@ -1,6 +1,31 @@
-// app/[province]/page.tsx
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+
+// ✅ Add this metadata function
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ province: string }>
+}): Promise<Metadata> {
+  const { province } = await params
+  const provinceName = province.replace(/-/g, ' ')
+  
+  return {
+    title: `Korean Motor Spares in ${provinceName} | Find Quality Auto Parts`,
+    description: `Find top-rated Korean motor spares and auto parts suppliers in ${provinceName}, South Africa. Compare prices, read reviews, and get contact details.`,
+    keywords: `${provinceName} Korean motor spares, auto parts ${provinceName}, car spares ${provinceName}, Hyundai parts ${provinceName}, Kia parts ${provinceName}`,
+    alternates: {
+      canonical: `https://koreanmotorsparesnearme.co.za/${province}`,
+    },
+    openGraph: {
+      title: `Korean Motor Spares in ${provinceName}`,
+      description: `Browse trusted motor spares suppliers in ${provinceName}. Get quality Korean auto parts today.`,
+      url: `https://koreanmotorsparesnearme.co.za/${province}`,
+      type: 'website',
+    },
+  }
+}
 
 export default async function ProvincePage({
   params,
