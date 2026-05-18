@@ -1,3 +1,4 @@
+// app/sitemap.ts
 import { createClient } from '@/lib/supabase/server'
 
 export default async function sitemap() {
@@ -5,87 +6,149 @@ export default async function sitemap() {
 
   const { data: businesses } = await supabase
     .from('businesses')
-    .select('slug, updated_at, city, province')
+    .select(`
+      slug,
+      updated_at,
+      city,
+      province,
+      city_slug,
+      province_slug
+    `)
 
-  const baseUrl = 'https://koreanmotorsparesnearme.co.za'
+  const baseUrl =
+    'https://koreanmotorsparesnearme.co.za'
 
   // -----------------------------
-  // 1. STATIC PAGES
+  // STATIC PAGES
   // -----------------------------
   const staticPages = [
-    { url: baseUrl, lastModified: new Date(), priority: 1 },
-    { url: `${baseUrl}/provinces`, lastModified: new Date(), priority: 0.9 },
-    { url: `${baseUrl}/categories`, lastModified: new Date(), priority: 0.9 },
-    { url: `${baseUrl}/brands`, lastModified: new Date(), priority: 0.9 },
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      priority: 1,
+    },
+
+    {
+      url: `${baseUrl}/provinces`,
+      lastModified: new Date(),
+      priority: 0.9,
+    },
+
+    {
+      url: `${baseUrl}/categories`,
+      lastModified: new Date(),
+      priority: 0.9,
+    },
+
+    {
+      url: `${baseUrl}/brands`,
+      lastModified: new Date(),
+      priority: 0.9,
+    },
+
+    {
+      url: `${baseUrl}/contact-us`,
+      lastModified: new Date(),
+      priority: 0.7,
+    },
+
+    {
+      url: `${baseUrl}/claim-business`,
+      lastModified: new Date(),
+      priority: 0.7,
+    },
+
+    {
+      url: `${baseUrl}/add-business`,
+      lastModified: new Date(),
+      priority: 0.7,
+    },
   ]
 
   // -----------------------------
-  // 2. LISTINGS
+  // LISTINGS
   // -----------------------------
   const listingPages =
     businesses?.map((b) => ({
-      url: `${baseUrl}/listing/${b.slug}`,
+      url: `${baseUrl}/listings/${b.slug}`,
       lastModified: b.updated_at,
       priority: 0.9,
       changeFrequency: 'weekly' as const,
     })) || []
 
   // -----------------------------
-  // 3. PROVINCES (DEDUPED)
+  // PROVINCES
   // -----------------------------
-  const provinces = [
-    ...new Set((businesses || []).map((b) => b.province).filter(Boolean)),
-  ]
-
-  const provincePages = provinces.map((province) => ({
-    url: `${baseUrl}/${encodeURIComponent(province)}`,
-    lastModified: new Date(),
-    priority: 0.8,
-    changeFrequency: 'weekly' as const,
-  }))
-
-  // -----------------------------
-  // 4. CITIES (DEDUPED)
-  // -----------------------------
-  const cityMap = new Map()
+  const provinceMap = new Map()
 
   businesses?.forEach((b) => {
-    const key = `${b.province}-${b.city}`
-    cityMap.set(
-      `${baseUrl}/${encodeURIComponent(b.province)}/${encodeURIComponent(
-        b.city
-      )}`,
+    if (!b.province_slug) return
+
+    provinceMap.set(
+      b.province_slug,
       {
-        url: `${baseUrl}/${encodeURIComponent(b.province)}/${encodeURIComponent(
-          b.city
-        )}`,
+        url: `${baseUrl}/${b.province_slug}`,
         lastModified: b.updated_at,
-        priority: 0.7,
+        priority: 0.8,
         changeFrequency: 'weekly',
       }
     )
   })
 
-  const cityPages = Array.from(cityMap.values())
+  const provincePages = Array.from(
+    provinceMap.values()
+  )
 
   // -----------------------------
-  // 5. NEAR ME PAGES
+  // CITY PAGES
   // -----------------------------
-  const nearMeMap = new Map()
+  const cityMap = new Map()
 
   businesses?.forEach((b) => {
-    nearMeMap.set(`${baseUrl}/near-me/${b.city}`, {
-      url: `${baseUrl}/near-me/${encodeURIComponent(b.city)}`,
-      lastModified: new Date(),
-      priority: 0.6,
+    if (
+      !b.province_slug ||
+      !b.city_slug
+    )
+      return
+
+    const url = `${baseUrl}/${b.province_slug}/${b.city_slug}`
+
+    cityMap.set(url, {
+      url,
+      lastModified: b.updated_at,
+      priority: 0.8,
       changeFrequency: 'weekly',
     })
   })
 
-  const nearMePages = Array.from(nearMeMap.values())
+  const cityPages = Array.from(
+    cityMap.values()
+  )
 
   // -----------------------------
-  // 6. KEYWORD LANDING PAGES (SEO GOLD)
+  // NEAR ME PAGES
+  // -----------------------------
+  const nearMeMap = new Map()
+
+  businesses?.forEach((b) => {
+    if (!b.city_slug) return
+
+    const url = `${baseUrl}/near-me/${b.city_slug}`
+
+    nearMeMap.set(url, {
+      url,
+      lastModified: b.updated_at,
+      priority: 0.7,
+      changeFrequency: 'weekly',
+    })
+  })
+
+  const nearMePages = Array.from(
+    nearMeMap.values()
+  )
+
+  // -----------------------------
+  // SEO LANDING PAGES
   // -----------------------------
   const keywords = [
     'korean-motor-spares',
@@ -95,33 +158,33 @@ export default async function sitemap() {
     'auto-parts',
   ]
 
-  const keywordPages: any[] = []
+  const seoMap = new Map()
 
   businesses?.forEach((b) => {
-    keywords.forEach((kw) => {
-      keywordPages.push({
-        url: `${baseUrl}/spares/${kw}/${encodeURIComponent(b.city)}`,
-        lastModified: new Date(),
-        priority: 0.6,
+    if (!b.city_slug) return
+
+    keywords.forEach((keyword) => {
+      const url = `${baseUrl}/spares/${keyword}/${b.city_slug}`
+
+      seoMap.set(url, {
+        url,
+        lastModified: b.updated_at,
+        priority: 0.7,
         changeFrequency: 'weekly',
       })
     })
   })
 
-  // remove duplicates
-  const uniqueKeywordPages = Array.from(
-    new Map(keywordPages.map((p) => [p.url, p])).values()
+  const seoPages = Array.from(
+    seoMap.values()
   )
 
-  // -----------------------------
-  // FINAL OUTPUT
-  // -----------------------------
   return [
     ...staticPages,
     ...listingPages,
     ...provincePages,
     ...cityPages,
     ...nearMePages,
-    ...uniqueKeywordPages,
+    ...seoPages,
   ]
 }
