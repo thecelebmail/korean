@@ -49,7 +49,7 @@ export default async function CategoryPage({
         {businesses.map((business: any) => (
           <Link
             key={business.id}
-            href={`/listing/${business.slug}`}
+            href={`/listings/${business.slug}`}
             className="rounded-xl border p-4 hover:shadow"
           >
             <h2 className="font-semibold">
