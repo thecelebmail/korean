@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { generateBusinessDescription } from '@/lib/utils/generateBusinessDescription'
+import { generateBusinessFAQs } from '@/lib/utils/generateBusinessFAQs'
 import { getNearbyBusinesses } from '@/lib/queries/businesses'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -136,6 +137,18 @@ const searchSuggestions = [
   `Korean motor spares near ${business.city}`,
 ]
 
+const faqs = generateBusinessFAQs(business)
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
 
   return (
     <>
@@ -196,8 +209,22 @@ const searchSuggestions = [
           </div>
         </main>
 
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+
+          <section className="mx-auto max-w-4xl px-4 py-12">
+            <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
+            <div className="mt-6 space-y-4">
+              {faqs.map((f) => (
+                <div key={f.q} className="rounded-xl border p-4">
+                  <h3 className="font-semibold">{f.q}</h3>
+                  <p className="mt-2 text-gray-600">{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
         {/* Nearby Listings */}
-  <section className="mt-16">
+  <section className="mx-auto max-w-4xl px-4 py-12">
     <h2 className="text-2xl font-bold">
       Nearby Motor Spares
     </h2>
@@ -232,7 +259,7 @@ const searchSuggestions = [
 
 
   {/* People Also Searched For */}
-  <section className="mt-16">
+  <section className="mx-auto max-w-4xl px-4 py-12">
     <h2 className="text-2xl font-bold">
       People Also Searched For
     </h2>
@@ -255,7 +282,7 @@ const searchSuggestions = [
     </div>
   </section>
   {/* Related Searches */}
-      <div className="mt-10 text-sm">
+      <div className="mx-auto max-w-4xl px-4 py-12">
         <h3 className="font-semibold">Related Searches</h3>
 
         <ul className="mt-2 space-y-1">

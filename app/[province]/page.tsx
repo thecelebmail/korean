@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
+import { generateBreadcrumbJsonLd } from '@/lib/utils/generateBreadcrumbJsonLd'
+import { Import } from 'lucide-react'
+import Script from 'next/script'
 
 // ✅ Add this metadata function
 export async function generateMetadata({
@@ -33,6 +37,7 @@ export default async function ProvincePage({
   params: Promise<{ province: string }>
 }) {
   const { province } = await params
+  const provinceName = province.replace(/-/g, ' ')
 
   const supabase = await createClient()
 
@@ -49,8 +54,19 @@ export default async function ProvincePage({
     ).entries(),
   ]
 
+    const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: provinceName }, // current page
+  ]
+
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd(breadcrumbItems, 'https://koreanmotorsparesnearme.co.za')
+
+
   return (
+    <>
+      <Script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
     <main className="mx-auto max-w-6xl px-4 py-12">
+      <Breadcrumbs items={breadcrumbItems} />
       <h1 className="text-4xl font-bold">
         Korean Motor Spares {province.replace(/-/g, ' ')}
       </h1>
@@ -71,5 +87,6 @@ export default async function ProvincePage({
         ))}
       </div>
     </main>
+    </>
   )
 }
