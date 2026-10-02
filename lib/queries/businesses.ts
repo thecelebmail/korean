@@ -1,5 +1,10 @@
+// lib/queries/businesses.ts
 import { createClient } from '@/lib/supabase/server'
 
+/**
+ * Fetches nearby alternative listings for individual directory pages.
+ * Preserved exactly as needed by app/listings/[slug]/page.tsx
+ */
 export async function getNearbyBusinesses(
   city: string,
   province: string,
@@ -32,6 +37,10 @@ export async function getNearbyBusinesses(
   return data || []
 }
 
+/**
+ * Handles text-based discovery matching. 
+ * Optimized to select required view properties only and enforces a strict structural limit.
+ */
 export async function searchBusinesses({
   q,
 }: {
@@ -39,7 +48,18 @@ export async function searchBusinesses({
 }) {
   const supabase = await createClient()
 
-  let query = supabase.from('businesses').select('*')
+  // OPTIMIZATION: Only request required rendering properties, never select('*')
+  let query = supabase.from('businesses').select(`
+    id,
+    name,
+    slug,
+    address,
+    city,
+    province,
+    rating,
+    tier,
+    image_url
+  `)
 
   if (q && q.trim() !== '') {
     const terms = q
@@ -62,13 +82,15 @@ export async function searchBusinesses({
     query = query.or(orParts.join(','))
   }
 
-  const { data, error } = await query.order('rating', {
-    ascending: false,
-  })
+  // OPTIMIZATION: Order listings by priority score, limiting response depth to 20 profiles per query page
+  const { data, error } = await query
+    .order('rating', {
+      ascending: false,
+    })
+    .limit(20)
 
   if (error) {
     console.error('searchBusinesses error:', error)
-
     return { data: [] }
   }
 

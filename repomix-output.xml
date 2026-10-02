@@ -1,0 +1,3217 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+app/
+  [province]/
+    [city]/
+      [category]/
+        page.tsx
+      page.tsx
+    page.tsx
+  add-business/
+    page.tsx
+  brands/
+    [brand]/
+      page.tsx
+    page.tsx
+  categories/
+    [category]/
+      page.tsx
+    page.tsx
+  claim-business/
+    page.tsx
+  contact-us/
+    page.tsx
+  listings/
+    [slug]/
+      page.tsx
+  near-me/
+    [city]/
+      page.tsx
+  privacy/
+    page.tsx
+  provinces/
+    page.tsx
+  search/
+    page.tsx
+  spares/
+    [keyword]/
+      [city]/
+        page.tsx
+  terms/
+    page.tsx
+  favicon.ico
+  globals.css
+  layout.tsx
+  page.tsx
+  robots.ts
+  sitemap.ts
+components/
+  home/
+    Hero.tsx
+    PopularCategories.tsx
+    PopularCities.tsx
+  layout/
+    Footer.tsx
+    Navbar.tsx
+  listings/
+    BusinessCard.tsx
+  search/
+    HeroSearch.tsx
+lib/
+  queries/
+    businesses.ts
+    taxonomy.ts
+  supabase/
+    admin.ts
+    client.ts
+    server.ts
+  utils/
+    generateBusinessDescription.ts
+  utils.ts
+public/
+  file.svg
+  globe.svg
+  hero-bg.png
+  korean-logo.png
+  next.svg
+  vercel.svg
+  window.svg
+types/
+  index.ts
+.gitignore
+AGENTS.md
+CLAUDE.md
+eslint.config.mjs
+next.config.ts
+package.json
+postcss.config.mjs
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="app/[province]/[city]/[category]/page.tsx">
+export default async function CategoryCityPage({
+  params,
+}: {
+  params: Promise<{
+    province: string
+    city: string
+    category: string
+  }>
+}) {
+  const { city, category } = await params
+
+  return (
+    <main>
+      <h1>
+        {category} in {city}
+      </h1>
+    </main>
+  )
+}
+</file>
+
+<file path="app/add-business/page.tsx">
+import { PlusCircle, Wrench } from 'lucide-react'
+
+export default function AddBusinessPage() {
+  return (
+    <main className="mx-auto max-w-3xl px-4 py-16">
+      <div className="rounded-2xl border bg-white p-8 shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
+          <PlusCircle className="h-10 w-10 text-blue-600" />
+
+          <h1 className="text-4xl font-bold">
+            Add Your Business
+          </h1>
+        </div>
+
+        <p className="text-lg text-gray-600">
+          Submit your motor spares business to our
+          South African directory and reach customers
+          searching for auto parts, Korean spares,
+          replacement parts, and accessories near them.
+        </p>
+
+        <div className="mt-8 rounded-xl border border-yellow-200 bg-yellow-50 p-5">
+          <div className="flex items-center gap-2">
+            <Wrench className="h-5 w-5 text-yellow-700" />
+
+            <p className="font-semibold text-yellow-800">
+              Submissions Not Yet Open, however you can reach out to us via the contact page to get your business added early.
+            </p>
+          </div>
+
+          <p className="mt-2 text-sm text-yellow-700">
+            Business submissions are currently being
+            prepared and will launch soon.
+          </p>
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold">
+            What You’ll Be Able To Add
+          </h2>
+
+          <ul className="mt-4 space-y-3 text-gray-700">
+            <li>• Business contact details</li>
+
+            <li>• Google Maps location</li>
+
+            <li>• Brands you supply</li>
+
+            <li>• Photos and logos</li>
+
+            <li>• WhatsApp and social media links</li>
+
+            <li>• SEO-optimized business listings</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/brands/page.tsx">
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+
+export default async function BrandsPage() {
+  const supabase = await createClient()
+
+  const { data: brands } = await supabase
+    .from('brands')
+    .select('*')
+    .order('name')
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">
+        Car Brands
+      </h1>
+
+      <p className="mt-4 text-gray-600">
+        Browse motor spares suppliers by vehicle brand.
+      </p>
+
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {(brands || []).map((brand) => (
+          <Link
+            key={brand.id}
+            href={`/brands/${brand.slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            <h2 className="font-semibold">
+              {brand.name}
+            </h2>
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/claim-business/page.tsx">
+import { ShieldCheck, Wrench } from 'lucide-react'
+
+export default function ClaimBusinessPage() {
+  return (
+    <main className="mx-auto max-w-3xl px-4 py-16">
+      <div className="rounded-2xl border bg-white p-8 shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
+          <ShieldCheck className="h-10 w-10 text-green-600" />
+
+          <h1 className="text-4xl font-bold">
+            Claim Your Business
+          </h1>
+        </div>
+
+        <p className="text-lg text-gray-600">
+          Own a motor spares business listed on our
+          directory? Claim your listing to update
+          contact details, add photos, improve SEO,
+          and manage your business profile.
+        </p>
+
+        <div className="mt-8 rounded-xl border border-yellow-200 bg-yellow-50 p-5">
+          <div className="flex items-center gap-2">
+            <Wrench className="h-5 w-5 text-yellow-700" />
+
+            <p className="font-semibold text-yellow-800">
+              Feature Not Yet Functional, however you can reach out to us via the contact page to get your business claimed early.
+            </p>
+          </div>
+
+          <p className="mt-2 text-sm text-yellow-700">
+            Business claiming is currently under
+            development and will be available soon.
+          </p>
+        </div>
+
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold">
+            Benefits of Claiming
+          </h2>
+
+          <ul className="mt-4 space-y-3 text-gray-700">
+            <li>• Update business information</li>
+
+            <li>• Add WhatsApp and website links</li>
+
+            <li>• Upload logos and business photos</li>
+
+            <li>• Improve visibility in search results</li>
+
+            <li>• Respond to customer enquiries</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/contact-us/page.tsx">
+import {
+  Mail,
+  MapPin,
+  Phone,
+  ShieldAlert,
+} from 'lucide-react'
+
+export default function ContactPage() {
+  return (
+    <main className="mx-auto max-w-4xl px-4 py-16">
+      <div className="rounded-2xl border bg-white p-8 shadow-sm">
+        {/* Header */}
+        <h1 className="text-4xl font-bold">
+          Contact Us
+        </h1>
+
+        <p className="mt-4 text-lg text-gray-600">
+          Need to claim a business, add a listing,
+          report incorrect information, or contact
+          our team? Reach out and we’ll assist you.
+        </p>
+
+        {/* Contact Cards */}
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          {/* Email */}
+          <div className="rounded-xl border p-5">
+            <Mail className="h-8 w-8 text-blue-600" />
+
+            <h2 className="mt-4 text-xl font-semibold">
+              Email
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-600">
+              Send listing requests, claims,
+              corrections, or partnership enquiries.
+            </p>
+
+            <a
+              href="mailto:info@elifdigital.co.za"
+              className="mt-4 block text-blue-600 underline"
+            >
+              info@elifdigital.co.za
+            </a>
+          </div>
+
+          {/* Phone */}
+          <div className="rounded-xl border p-5">
+            <Phone className="h-8 w-8 text-green-600" />
+
+            <h2 className="mt-4 text-xl font-semibold">
+              Phone / WhatsApp
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-600">
+              Contact us directly for urgent
+              listing corrections or claims.
+            </p>
+
+            <a
+              href="tel:+27733819701"
+              className="mt-4 block text-blue-600 underline"
+            >
+              +27 73 381 9701
+            </a>
+          </div>
+
+          {/* Coverage */}
+          <div className="rounded-xl border p-5">
+            <MapPin className="h-8 w-8 text-red-600" />
+
+            <h2 className="mt-4 text-xl font-semibold">
+              Coverage
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-600">
+              We cover Korean motor spares and
+              auto parts suppliers across
+              South Africa.
+            </p>
+          </div>
+        </div>
+
+        {/* Manual Requests */}
+        <div className="mt-12 rounded-2xl border border-yellow-200 bg-yellow-50 p-6">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="h-6 w-6 text-yellow-700" />
+
+            <h2 className="text-2xl font-bold text-yellow-800">
+              Manual Listing Requests
+            </h2>
+          </div>
+
+          <p className="mt-4 text-gray-700">
+            While automated claiming and business
+            submissions are still under development,
+            we currently process requests manually.
+          </p>
+
+          <div className="mt-6 space-y-4 text-gray-700">
+            <div>
+              <h3 className="font-semibold">
+                Claim A Business
+              </h3>
+
+              <p className="text-sm text-gray-600">
+                Send your business name, phone
+                number, and proof of ownership.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold">
+                Add A Business
+              </h3>
+
+              <p className="text-sm text-gray-600">
+                Send your business details,
+                address, city, and contact
+                information.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold">
+                Report Incorrect Information
+              </h3>
+
+              <p className="text-sm text-gray-600">
+                Let us know about outdated
+                phone numbers, addresses,
+                or duplicate listings.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/near-me/[city]/page.tsx">
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+
+export default async function NearMePage({
+  params,
+}: {
+  params: Promise<{ city: string }>
+}) {
+  const { city } = await params
+
+  const supabase = await createClient()
+
+  const { data: businesses } = await supabase
+    .from('businesses')
+    .select('*')
+    .ilike('city', city)
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">
+        Motor Spares Near {city}
+      </h1>
+
+      <p className="mt-4 text-gray-600">
+        Find trusted motor spares shops near you in {city}.
+      </p>
+
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {(businesses || []).map((b) => (
+          <Link
+            key={b.id}
+            href={`/listings/${b.slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            <h3 className="font-semibold">{b.name}</h3>
+            <p className="text-sm text-gray-600">{b.address}</p>
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/privacy/page.tsx">
+export default function PrivacyPage() {
+  return (
+    <main className="mx-auto max-w-4xl px-4 py-16">
+      <h1 className="text-4xl font-bold">
+        Privacy Policy
+      </h1>
+
+      <p className="mt-6 text-gray-600">
+        Last updated: May 2026
+      </p>
+
+      <div className="mt-10 space-y-8 leading-8 text-gray-700">
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Introduction
+          </h2>
+
+          <p className="mt-3">
+            We respect your privacy and are committed
+            to protecting your personal information.
+            This Privacy Policy explains how we collect,
+            use, and safeguard information when you use
+            our motor spares directory website.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Information We Collect
+          </h2>
+
+          <p className="mt-3">
+            We may collect information submitted through
+            contact forms, business listing requests,
+            correction requests, and business claim
+            submissions.
+          </p>
+
+          <p className="mt-3">
+            This may include names, phone numbers,
+            email addresses, and business information.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Business Listings
+          </h2>
+
+          <p className="mt-3">
+            Business information displayed on this
+            directory may originate from publicly
+            available sources, user submissions,
+            or direct business contributions.
+          </p>
+
+          <p className="mt-3">
+            If information is inaccurate or outdated,
+            businesses may contact us for corrections
+            or removal requests.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Cookies & Analytics
+          </h2>
+
+          <p className="mt-3">
+            We may use cookies and analytics tools
+            to improve website performance, user
+            experience, and search functionality.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Third-Party Links
+          </h2>
+
+          <p className="mt-3">
+            Listings may contain links to third-party
+            websites including social media platforms,
+            WhatsApp, and external business websites.
+            We are not responsible for the privacy
+            practices of those websites.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Contact
+          </h2>
+
+          <p className="mt-3">
+            For privacy-related requests or corrections,
+            please contact us through the contact page.
+          </p>
+        </section>
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/provinces/page.tsx">
+// app/provinces/page.tsx
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+
+export default async function ProvincesPage() {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('businesses')
+    .select('province, province_slug')
+    .not('province_slug', 'is', null)
+
+  const provinces = [
+    ...new Map(
+      (data || []).map(b => [b.province_slug, b.province])
+    ).entries(),
+  ]
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">Provinces</h1>
+
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {provinces.map(([slug, name]) => (
+          <Link
+            key={slug}
+            href={`/${slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            {name}
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/spares/[keyword]/[city]/page.tsx">
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+
+export default async function LandingPage({
+  params,
+}: {
+  params: Promise<{ keyword: string; city: string }>
+}) {
+  const { keyword, city } = await params
+
+  const supabase = await createClient()
+
+  const searchKeyword = keyword.replaceAll('-', ' ')
+
+  const { data: businesses } = await supabase
+    .from('businesses')
+    .select('*')
+    .ilike('city', city)
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">
+        {searchKeyword} in {city}
+      </h1>
+
+      <p className="mt-4 text-gray-600">
+        Find {searchKeyword} suppliers in {city}.
+      </p>
+
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {(businesses || []).map((b) => (
+          <Link
+            key={b.id}
+            href={`/listings/${b.slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            <h3 className="font-semibold">{b.name}</h3>
+            <p className="text-sm text-gray-600">{b.address}</p>
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/terms/page.tsx">
+export default function TermsPage() {
+  return (
+    <main className="mx-auto max-w-4xl px-4 py-16">
+      <h1 className="text-4xl font-bold">
+        Terms of Use
+      </h1>
+
+      <p className="mt-6 text-gray-600">
+        Last updated: May 2026
+      </p>
+
+      <div className="mt-10 space-y-8 leading-8 text-gray-700">
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Acceptance of Terms
+          </h2>
+
+          <p className="mt-3">
+            By using this website, you agree to these
+            Terms of Use and all applicable laws and
+            regulations.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Directory Information
+          </h2>
+
+          <p className="mt-3">
+            We aim to provide accurate business
+            information, but we do not guarantee
+            that listings, phone numbers, addresses,
+            ratings, or availability are always
+            complete or up to date.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Business Claims & Corrections
+          </h2>
+
+          <p className="mt-3">
+            Business owners may request listing
+            corrections, updates, or ownership
+            claims by contacting us directly.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Prohibited Use
+          </h2>
+
+          <p className="mt-3">
+            Users may not misuse this website,
+            attempt unauthorized access,
+            scrape data excessively,
+            or interfere with website functionality.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            External Links
+          </h2>
+
+          <p className="mt-3">
+            This website may contain links to
+            external websites. We are not
+            responsible for third-party content,
+            services, or business practices.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Limitation of Liability
+          </h2>
+
+          <p className="mt-3">
+            We are not liable for losses, damages,
+            or disputes arising from the use of
+            businesses listed on this directory.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-semibold">
+            Changes to Terms
+          </h2>
+
+          <p className="mt-3">
+            We may update these Terms of Use at any
+            time without prior notice.
+          </p>
+        </section>
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+
+:root {
+  --brand: #ea580c;
+  --brand-dark: #c2410c;
+  --brand-light: #fed7aa;
+  --surface: #ffffff;
+  --surface-2: #fafaf9;
+  --border: #e7e5e4;
+  --text: #1c1917;
+  --text-muted: #78716c;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    @apply bg-stone-50 text-stone-900 antialiased;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+</file>
+
+<file path="app/robots.ts">
+export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+    },
+
+    sitemap:
+      'https://koreanmotorsparesnearme.co.za/sitemap.xml',
+  }
+}
+</file>
+
+<file path="components/home/PopularCategories.tsx">
+import Link from 'next/link'
+
+const categories = [
+  'Toyota Spares',
+  'BMW Spares',
+  'Used Auto Parts',
+  'Truck Spares',
+  'Gearbox Specialists',
+  'Engine Spares',
+]
+
+export default function PopularCategories() {
+  return (
+    <section className="py-16 bg-white">
+      <div className="mx-auto max-w-6xl px-4">
+        <h2 className="mb-8 text-3xl font-bold">
+          Popular Categories
+        </h2>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {categories.map((category) => (
+            <Link
+              key={category}
+              href="/search"
+              className="rounded-xl border p-6 hover:shadow-lg"
+            >
+              <h3 className="font-semibold">
+                {category}
+              </h3>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="lib/queries/taxonomy.ts">
+// lib/queries/taxonomy.ts
+import { createClient } from "@/lib/supabase/server";
+import type { Province, City, Category, Brand } from "@/types";
+
+export async function getAllProvinces(): Promise<Province[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("provinces")
+    .select("id, name, slug")
+    .order("name");
+  return (data ?? []) as Province[];
+}
+
+export async function getProvinceBySlug(slug: string): Promise<Province | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("provinces")
+    .select("id, name, slug")
+    .eq("slug", slug)
+    .single();
+  return data as Province | null;
+}
+
+export async function getCitiesByProvince(provinceSlug: string): Promise<City[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("cities")
+    .select("id, name, slug, province_id, province:provinces(id, name, slug)")
+    .eq("province.slug", provinceSlug)
+    .order("name");
+  return (data ?? []) as unknown as City[];
+}
+
+export async function getAllCities(): Promise<City[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("cities")
+    .select("id, name, slug, province_id, province:provinces(id, name, slug)")
+    .order("name");
+  return (data ?? []) as unknown as City[];
+}
+
+export async function getCityBySlug(slug: string): Promise<City | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("cities")
+    .select("id, name, slug, province_id, province:provinces(id, name, slug)")
+    .eq("slug", slug)
+    .single();
+  return data as unknown as City | null;
+}
+
+export async function getAllCategories(): Promise<Category[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("categories")
+    .select("id, name, slug")
+    .order("name");
+  return (data ?? []) as Category[];
+}
+
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("categories")
+    .select("id, name, slug")
+    .eq("slug", slug)
+    .single();
+  return data as Category | null;
+}
+
+export async function getAllBrands(): Promise<Brand[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("brands")
+    .select("id, name, slug")
+    .order("name");
+  return (data ?? []) as Brand[];
+}
+
+export async function getBrandBySlug(slug: string): Promise<Brand | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("brands")
+    .select("id, name, slug")
+    .eq("slug", slug)
+    .single();
+  return data as Brand | null;
+}
+</file>
+
+<file path="lib/supabase/admin.ts">
+// lib/supabase/admin.ts
+import { createClient } from "@supabase/supabase-js";
+
+// Only use server-side — never expose to browser
+export function createAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+}
+</file>
+
+<file path="lib/supabase/client.ts">
+// lib/supabase/client.ts
+import { createBrowserClient } from "@supabase/ssr";
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+</file>
+
+<file path="lib/supabase/server.ts">
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          cookieStore.set({ name, value, ...options })
+        },
+        remove(name: string, options: any) {
+          cookieStore.set({ name, value: '', ...options })
+        },
+      },
+    }
+  )
+}
+</file>
+
+<file path="lib/utils/generateBusinessDescription.ts">
+export function generateBusinessDescription(
+  business: any
+) {
+  const parts = []
+
+  parts.push(
+    `${business.name} is a motor spares supplier based in ${business.city}, ${business.province}.`
+  )
+
+  if (business.rating) {
+    parts.push(
+      `The business currently has a ${business.rating} star customer rating.`
+    )
+  }
+
+  if (business.address) {
+    parts.push(
+      `It is located at ${business.address}.`
+    )
+  }
+
+  parts.push(
+    `Customers can contact ${business.name} for vehicle parts, replacement spares, and automotive accessories.`
+  )
+
+  return parts.join(' ')
+}
+</file>
+
+<file path="lib/utils.ts">
+// lib/utils.ts
+import { type ClassValue, clsx } from "clsx";
+
+export function cn(...inputs: ClassValue[]) {
+  return clsx(inputs);
+}
+
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+export function formatPhone(phone: string): string {
+  // Format South African numbers: 011 123 4567 or +27 11 123 4567
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.startsWith("27") && cleaned.length === 11) {
+    return `+27 ${cleaned.slice(2, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7)}`;
+  }
+  if (cleaned.length === 10) {
+    return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
+  }
+  return phone;
+}
+
+export function formatRating(rating: number | null): string {
+  if (!rating) return "No reviews";
+  return rating.toFixed(1);
+}
+
+export const DAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+export function isOpenNow(
+  hours: Array<{
+    day_of_week: number;
+    opens_at: string | null;
+    closes_at: string | null;
+    is_closed: boolean;
+  }>
+): boolean {
+  const now = new Date();
+  const day = now.getDay();
+  const todayHours = hours.find((h) => h.day_of_week === day);
+  if (!todayHours || todayHours.is_closed) return false;
+  if (!todayHours.opens_at || !todayHours.closes_at) return false;
+
+  const [openH, openM] = todayHours.opens_at.split(":").map(Number);
+  const [closeH, closeM] = todayHours.closes_at.split(":").map(Number);
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
+
+  return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+}
+
+export const POPULAR_CITIES = [
+  { name: "Johannesburg", slug: "johannesburg", province: "gauteng" },
+  { name: "Pretoria", slug: "pretoria", province: "gauteng" },
+  { name: "Durban", slug: "durban", province: "kwazulu-natal" },
+  { name: "Cape Town", slug: "cape-town", province: "western-cape" },
+  { name: "Polokwane", slug: "polokwane", province: "limpopo" },
+  { name: "Bloemfontein", slug: "bloemfontein", province: "free-state" },
+  { name: "Port Elizabeth", slug: "port-elizabeth", province: "eastern-cape" },
+  { name: "East London", slug: "east-london", province: "eastern-cape" },
+  { name: "Nelspruit", slug: "nelspruit", province: "mpumalanga" },
+  { name: "Rustenburg", slug: "rustenburg", province: "north-west" },
+];
+
+export const POPULAR_CATEGORIES = [
+  { name: "Toyota Spares", slug: "toyota-spares", icon: "🚗" },
+  { name: "BMW Spares", slug: "bmw-spares", icon: "🚙" },
+  { name: "Used Auto Parts", slug: "used-auto-parts", icon: "🔧" },
+  { name: "Truck Spares", slug: "truck-spares", icon: "🚛" },
+  { name: "Gearbox Specialists", slug: "gearbox-specialists", icon: "⚙️" },
+  { name: "Engine Spares", slug: "engine-spares", icon: "🔩" },
+  { name: "Auto Electrical", slug: "auto-electrical", icon: "⚡" },
+  { name: "Scrapyards", slug: "scrapyards", icon: "🏭" },
+];
+
+export const ALL_PROVINCES = [
+  { name: "Gauteng", slug: "gauteng" },
+  { name: "KwaZulu-Natal", slug: "kwazulu-natal" },
+  { name: "Western Cape", slug: "western-cape" },
+  { name: "Eastern Cape", slug: "eastern-cape" },
+  { name: "Limpopo", slug: "limpopo" },
+  { name: "Mpumalanga", slug: "mpumalanga" },
+  { name: "North West", slug: "north-west" },
+  { name: "Free State", slug: "free-state" },
+  { name: "Northern Cape", slug: "northern-cape" },
+];
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path="types/index.ts">
+export interface Province {
+  id: number
+  name: string
+  slug: string
+}
+
+export interface City {
+  id: number
+  name: string
+  slug: string
+}
+
+export interface Category {
+  id: number
+  name: string
+  slug: string
+}
+
+export interface Brand {
+  id: number
+  name: string
+  slug: string
+}
+
+export interface Business {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  address?: string
+  phone?: string
+  whatsapp?: string
+  website?: string
+  image_url?: string
+  logo_url?: string
+  rating?: number
+  review_count?: number
+  is_verified: boolean
+  is_featured?: boolean
+  featured_score?: number
+
+  city?: City
+  province?: Province
+}
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="AGENTS.md">
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->
+</file>
+
+<file path="CLAUDE.md">
+@AGENTS.md
+</file>
+
+<file path="eslint.config.mjs">
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+</file>
+
+<file path="package.json">
+{
+  "name": "korean",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^1.14.0",
+    "next": "16.2.6",
+    "next-themes": "^0.4.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.75.0",
+    "react-icons": "^5.6.0",
+    "sharp": "^0.34.5",
+    "slugify": "^1.6.9",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="postcss.config.mjs">
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+
+export default config;
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="app/brands/[brand]/page.tsx">
+import { createClient } from '@/lib/supabase/server'
+import { MapPin, Star } from 'lucide-react'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+
+export default async function BrandPage({
+  params,
+}: {
+  params: Promise<{ brand: string }>
+}) {
+  const { brand } = await params
+
+  const supabase = await createClient()
+
+  // Get brand
+  const { data: brandData } = await supabase
+    .from('brands')
+    .select('*')
+    .eq('slug', brand)
+    .single()
+
+  if (!brandData) {
+    return notFound()
+  }
+
+  // Get businesses linked to brand
+  const { data: linkedBusinesses } = await supabase
+    .from('business_brands')
+    .select(`
+      business:businesses(*)
+    `)
+    .eq('brand_id', brandData.id)
+
+  const businesses =
+    linkedBusinesses?.map((item: any) => item.business) || []
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">
+        {brandData.name} Spares
+      </h1>
+
+      <p className="mt-4 text-gray-600">
+        Find trusted {brandData.name} spares suppliers across South Africa.
+      </p>
+
+      <div className="mt-10 grid gap-6 md:grid-cols-3">
+        {businesses.map((business: any) => (
+          <Link
+            key={business.id}
+            href={`/listing/${business.slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            <h2 className="font-semibold">
+              {business.name}
+            </h2>
+
+            <p className="text-sm text-gray-600">
+              <MapPin className="inline-block" /> 
+              {business.address}
+            </p>
+
+            <p className="mt-2 text-sm">
+              <Star className="inline-block fill-yellow-400 text-yellow-400" /> {business.rating ?? 'No rating'}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/categories/[category]/page.tsx">
+import { createClient } from '@/lib/supabase/server'
+import { MapPin, Star } from 'lucide-react'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>
+}) {
+  const { category } = await params
+
+  const supabase = await createClient()
+
+  // Get category
+  const { data: categoryData } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('slug', category)
+    .single()
+
+  if (!categoryData) {
+    return notFound()
+  }
+
+  // Get linked businesses
+  const { data: businessLinks } = await supabase
+    .from('business_categories')
+    .select(`
+      business:businesses(*)
+    `)
+    .eq('category_id', categoryData.id)
+
+  const businesses =
+    businessLinks?.map((item: any) => item.business) || []
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">
+        {categoryData.name}
+      </h1>
+
+      <p className="mt-4 text-gray-600">
+        Browse businesses under {categoryData.name}
+      </p>
+
+      <div className="mt-10 grid gap-6 md:grid-cols-3">
+        {businesses.map((business: any) => (
+          <Link
+            key={business.id}
+            href={`/listing/${business.slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            <h2 className="font-semibold">
+              {business.name}
+            </h2>
+
+            <p className="text-sm text-gray-600"><MapPin className="inline-block w-4 h-4 text-gray-400"  />
+              {business.address}
+            </p>
+
+            <p className="mt-2 text-sm"><Star className="inline-block w-4 h-4 text-yellow-400"  />
+               {business.rating ?? 'No rating'}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/categories/page.tsx">
+// app/categories/page.tsx
+
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+
+export default async function CategoriesPage() {
+  const supabase = await createClient()
+
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('*')
+    .order('name')
+
+return (
+  <main className="mx-auto max-w-6xl px-4 py-12">
+    {/* Hero */}
+    <section className="max-w-3xl">
+      <h1 className="text-4xl font-bold md:text-5xl">
+        Motor Spares Categories
+      </h1>
+
+      <p className="mt-6 text-lg leading-8 text-gray-600">
+        Browse Korean motor spares, auto parts,
+        replacement components, and automotive
+        suppliers across South Africa by category.
+
+        Find trusted businesses supplying
+        engines, bumpers, service kits,
+        suspension parts, body panels,
+        gearboxes, lights, and more.
+      </p>
+    </section>
+
+    {/* Categories Grid */}
+    <section className="mt-12">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {(categories || []).map((category) => (
+          <Link
+            key={category.id}
+            href={`/categories/${category.slug}`}
+            className="group rounded-2xl border bg-white p-6 transition hover:-translate-y-1 hover:shadow-lg"
+          >
+            <h2 className="text-xl font-semibold group-hover:text-blue-600">
+              {category.name}
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-gray-600">
+              Browse businesses supplying{' '}
+              {category.name.toLowerCase()} and
+              related motor spares across South Africa.
+            </p>
+
+            <div className="mt-5 text-sm font-medium text-blue-600">
+              View Listings →
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+
+    {/* SEO Content */}
+    <section className="mt-20 rounded-3xl bg-gray-100 p-8">
+      <h2 className="text-3xl font-bold">
+        Korean Motor Spares Directory
+      </h2>
+
+      <p className="mt-5 leading-8 text-gray-700">
+        Our directory helps drivers and workshops
+        discover trusted Korean motor spares
+        suppliers throughout South Africa.
+
+        Search for Hyundai, Kia, Daewoo,
+        SsangYong, and aftermarket replacement
+        parts suppliers near you.
+      </p>
+
+      <p className="mt-5 leading-8 text-gray-700">
+        Whether you need bumpers, engines,
+        suspension components, headlights,
+        service kits, radiators, or body parts,
+        browse businesses by category and location
+        to find the right supplier quickly.
+      </p>
+    </section>
+
+    {/* Popular Searches */}
+    <section className="mt-16">
+      <h2 className="text-2xl font-bold">
+        Popular Searches
+      </h2>
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        {[
+          'Korean Motor Spares',
+          'Korean Motor Spares Near Me',
+          'Hyundai Spares',
+          'Kia Spares',
+          'Bumper To Bumper Spares',
+          'Engine Parts',
+          'Auto Body Parts',
+          'Gearbox Spares',
+          'Replacement Parts',
+        ].map((keyword) => (
+          <h1
+            key={keyword}
+            className="rounded-full border bg-white px-4 py-2 text-sm text-gray-700"
+          >
+            {keyword}
+          </h1>
+        ))}
+      </div>
+    </section>
+  </main>
+)
+}
+</file>
+
+<file path="app/search/page.tsx">
+import Link from 'next/link'
+
+import { searchBusinesses } from '@/lib/queries/businesses'
+
+import {
+  MapPin,
+  Search,
+  Star,
+} from 'lucide-react'
+
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const params = await searchParams
+
+  const q = params.q
+
+  const results = await searchBusinesses({ q })
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      {/* Header */}
+      <div className="mb-8 flex items-center gap-2">
+        <Search className="h-6 w-6 text-gray-600" />
+
+        <h1 className="text-3xl font-bold">
+          Search Results
+        </h1>
+      </div>
+
+      {/* Query */}
+      {q && (
+        <p className="mb-6 text-gray-600">
+          Results for:{' '}
+          <span className="font-semibold">
+            {q}
+          </span>
+        </p>
+      )}
+
+      {/* Empty */}
+      {results.data.length === 0 ? (
+        <p className="text-gray-500">
+          No businesses found.
+        </p>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {results.data.map((business) => (
+            <Link
+              key={business.id}
+              href={`/listings/${business.slug}`}
+              className="rounded-xl border p-4 transition hover:shadow hover:border-black block"
+            >
+              {/* Name */}
+              <h2 className="text-lg font-semibold">
+                {business.name}
+              </h2>
+
+              {/* Address */}
+              <p className="mt-2 flex items-start gap-2 text-sm text-gray-600">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+
+                <span>
+                  {business.address}
+                </span>
+              </p>
+
+              {/* Rating */}
+              <p className="mt-3 flex items-center gap-2 text-sm">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+
+                <span>
+                  {business.rating ?? 'No rating'}
+                </span>
+              </p>
+            </Link>
+          ))}
+        </div>
+      )}
+    </main>
+  )
+}
+</file>
+
+<file path="app/page.tsx">
+import Hero from '@/components/home/Hero'
+import PopularCategories from '@/components/home/PopularCategories'
+import PopularCities from '@/components/home/PopularCities'
+
+export default function HomePage() {
+  return (
+    <main>
+      <Hero />
+      <PopularCategories />
+      <PopularCities />
+    </main>
+  )
+}
+</file>
+
+<file path="components/home/Hero.tsx">
+// components/home/hero.tsx
+import Link from 'next/link'
+import {
+  MapPin,
+  Search,
+  ShieldCheck,
+  Star,
+  Truck,
+  Wrench,
+} from 'lucide-react'
+
+import SearchBar from '@/components/search/HeroSearch'
+
+export default function Hero() {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-stone-100 to-white py-20 lg:py-28">
+      {/* Background Glow */}
+      <div className="absolute inset-0 opacity-40">
+        <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-orange-200 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-yellow-100 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-4">
+        <div className="mx-auto max-w-4xl text-center">
+          {/* Badge */}
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700">
+            <ShieldCheck className="h-4 w-4" />
+            South African Korean Motor Spares Directory
+          </div>
+
+          {/* Main Heading */}
+          <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-stone-900 md:text-6xl lg:text-7xl">
+            Korean Motor Spares Near Me
+          </h1>
+
+          {/* Supporting SEO Copy */}
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-stone-600 md:text-xl">
+            Find trusted Korean motor spares suppliers, Hyundai spares,
+            Kia spares, Korean scrapyards, engines, body parts,
+            suspension parts, and bumper-to-bumper spares across
+            Johannesburg, Pretoria, Durban, Cape Town, and South Africa.
+          </p>
+
+          {/* Search */}
+          <div className="mx-auto mt-10 max-w-3xl">
+            <SearchBar />
+          </div>
+
+          {/* SEO Search Suggestions */}
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            {[
+              'Korean motor spares Johannesburg',
+              'Hyundai spares Pretoria',
+              'Kia spares Durban',
+              'Bumper to bumper Johannesburg',
+              'Korean scrapyards Gauteng',
+              'Korean engines Cape Town',
+            ].map((item) => (
+              <Link
+                key={item}
+                href={`/search?q=${encodeURIComponent(item)}`}
+                className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600 hover:shadow"
+              >
+                {item}
+              </Link>
+            ))}
+          </div>
+
+          {/* Trust Stats */}
+          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                <MapPin className="h-6 w-6 text-orange-600" />
+              </div>
+
+              <p className="mt-4 text-3xl font-bold text-stone-900">
+                1000+
+              </p>
+
+              <p className="mt-1 text-sm text-stone-600">
+                Listings Across South Africa
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                <Wrench className="h-6 w-6 text-orange-600" />
+              </div>
+
+              <p className="mt-4 text-3xl font-bold text-stone-900">
+                500k+
+              </p>
+
+              <p className="mt-1 text-sm text-stone-600">
+                Korean Vehicle Parts
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                <Truck className="h-6 w-6 text-orange-600" />
+              </div>
+
+              <p className="mt-4 text-3xl font-bold text-stone-900">
+                Nationwide
+              </p>
+
+              <p className="mt-1 text-sm text-stone-600">
+                Delivery & Courier Support
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                <Star className="h-6 w-6 text-orange-600" />
+              </div>
+
+              <p className="mt-4 text-3xl font-bold text-stone-900">
+                Trusted
+              </p>
+
+              <p className="mt-1 text-sm text-stone-600">
+                Suppliers & Scrap Yards
+              </p>
+            </div>
+          </div>
+
+          {/* Keyword Rich Content */}
+          <div className="mx-auto mt-16 max-w-5xl rounded-3xl border border-stone-200 bg-white p-8 text-left shadow-sm">
+            <div className="flex items-center gap-2">
+              <Search className="h-5 w-5 text-orange-600" />
+
+              <h2 className="text-2xl font-bold text-stone-900">
+                Find Korean Car Parts Fast
+              </h2>
+            </div>
+
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div>
+                <p className="leading-7 text-stone-600">
+                  Search for Korean motor spares near you including
+                  Hyundai, Kia, Daewoo, SsangYong, and Chevrolet parts.
+                  Browse suppliers by city, province, category, or brand.
+                </p>
+
+                <ul className="mt-5 space-y-3 text-sm text-stone-700">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 text-green-600">✓</span>
+                    Hyundai engines, gearboxes & body parts
+                  </li>
+
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 text-green-600">✓</span>
+                    Kia Picanto, Rio & Sportage spares
+                  </li>
+
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 text-green-600">✓</span>
+                    Korean scrapyards & used parts suppliers
+                  </li>
+
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 text-green-600">✓</span>
+                    Bumper to bumper spares Johannesburg
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="leading-7 text-stone-600">
+                  Whether you need suspension parts, brake pads,
+                  headlights, mirrors, radiators, engines, or complete
+                  Korean vehicle stripping services, compare suppliers
+                  across South Africa from one directory.
+                </p>
+
+                <div className="mt-5 rounded-2xl bg-orange-50 p-5">
+                  <p className="font-semibold text-orange-700">
+                    Popular Searches
+                  </p>
+
+                  <div className="mt-3 flex flex-wrap gap-2 text-sm">
+                    {[
+                      'Korean motor spares near me',
+                      'Bumper to bumper Jules Street',
+                      'Kia scrapyard Johannesburg',
+                      'Hyundai spares Gauteng',
+                      'Korean used parts Pretoria',
+                    ].map((item) => (
+                      <Link
+                        key={item}
+                        href={`/search?q=${encodeURIComponent(item)}`}
+                        className="rounded-full bg-white px-3 py-1.5 text-stone-700 shadow-sm hover:text-orange-600"
+                      >
+                        {item}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="mt-14">
+            <Link
+              href="/add-business"
+              className="inline-flex items-center rounded-xl bg-orange-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-700"
+            >
+              Add Your Business
+            </Link>
+
+            <p className="mt-4 text-sm text-stone-500">
+              Own a Korean spares shop or scrapyard? List your business
+              and reach customers searching daily for Korean auto parts.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="components/home/PopularCities.tsx">
+import Link from 'next/link'
+import { MapPin } from 'lucide-react'
+
+const cities = [
+  'Johannesburg',
+  'Pretoria',
+  'Durban',
+  'Cape Town',
+  'Polokwane',
+  'Bloemfontein',
+]
+
+export default function PopularCities() {
+  return (
+    <section className="bg-gray-50 py-16">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mb-10">
+          <h2 className="text-3xl font-bold text-stone-900">
+            Popular Cities
+          </h2>
+
+          <p className="mt-3 max-w-2xl text-stone-600">
+            Browse Korean motor spares suppliers, Hyundai spares,
+            Kia parts, scrapyards, and bumper-to-bumper listings
+            in major South African cities.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {cities.map((city) => (
+            <Link
+              key={city}
+              href={`/search?q=${encodeURIComponent(
+                `Korean motor spares ${city}`
+              )}`}
+              className="group rounded-2xl border border-stone-200 bg-white p-6 transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                  <MapPin className="h-5 w-5 text-orange-600" />
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-stone-900 group-hover:text-orange-600">
+                    {city}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-stone-500">
+                    View suppliers in {city}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-600">
+                  Hyundai Spares
+                </span>
+
+                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-600">
+                  Kia Parts
+                </span>
+
+                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-600">
+                  Korean Scrap Yards
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Extra SEO Internal Links */}
+        <div className="mt-12 rounded-2xl border border-stone-200 bg-white p-6">
+          <h3 className="text-lg font-semibold text-stone-900">
+            Popular Searches
+          </h3>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            {[
+              'Korean motor spares Johannesburg',
+              'Kia spares Pretoria',
+              'Hyundai spares Durban',
+              'Bumper to bumper Johannesburg',
+              'Korean scrapyards Cape Town',
+              'Korean used parts Polokwane',
+            ].map((term) => (
+              <Link
+                key={term}
+                href={`/search?q=${encodeURIComponent(term)}`}
+                className="rounded-full bg-orange-50 px-4 py-2 text-sm text-orange-700 transition hover:bg-orange-100"
+              >
+                {term}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="app/[province]/page.tsx">
+import type { Metadata } from 'next'
+import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
+
+// ✅ Add this metadata function
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ province: string }>
+}): Promise<Metadata> {
+  const { province } = await params
+  const provinceName = province.replace(/-/g, ' ')
+  
+  return {
+    title: `Korean Motor Spares in ${provinceName} | Find Quality Auto Parts`,
+    description: `Find top-rated Korean motor spares and auto parts suppliers in ${provinceName}, South Africa. Compare prices, read reviews, and get contact details.`,
+    keywords: `${provinceName} Korean motor spares, auto parts ${provinceName}, car spares ${provinceName}, Hyundai parts ${provinceName}, Kia parts ${provinceName}`,
+    alternates: {
+      canonical: `https://koreanmotorsparesnearme.co.za/${province}`,
+    },
+    openGraph: {
+      title: `Korean Motor Spares in ${provinceName}`,
+      description: `Browse trusted motor spares suppliers in ${provinceName}. Get quality Korean auto parts today.`,
+      url: `https://koreanmotorsparesnearme.co.za/${province}`,
+      type: 'website',
+    },
+  }
+}
+
+export default async function ProvincePage({
+  params,
+}: {
+  params: Promise<{ province: string }>
+}) {
+  const { province } = await params
+
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('businesses')
+    .select('city, city_slug')
+    .eq('province_slug', province)
+
+  const cities = [
+    ...new Map(
+      (data || [])
+        .filter(b => b.city_slug)
+        .map(b => [b.city_slug, b.city])
+    ).entries(),
+  ]
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">
+        Korean Motor Spares {province.replace(/-/g, ' ')}
+      </h1>
+
+      <p className="mt-4 text-gray-600">
+        Find motor spares suppliers in {province.replace(/-/g, ' ')}
+      </p>
+
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {cities.map(([slug, name]) => (
+          <Link
+            key={slug}
+            href={`/${province}/${slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            {name}
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/layout.tsx">
+// app/layout.tsx
+import type { Metadata } from "next";
+import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import Script from "next/script";
+
+export const metadata: Metadata = {
+  metadataBase: new URL('https://koreanmotorsparesnearme.co.za'),
+
+  title: {
+    default: 'Korean Motor Spares South Africa',
+    template: '%s | Korean Motor Spares',
+  },
+
+  description:
+    'Find Korean motor spares suppliers across South Africa including Hyundai, Kia, Daewoo and SsangYong spares.',
+
+  keywords: [
+    'korean motor spares',
+    'korean motor spares near me',
+    'hyundai spares',
+    'kia spares',
+    'bumper to bumper',
+    'auto spares south africa',
+  ],
+
+  alternates: {
+    canonical: '/',
+  },
+
+  openGraph: {
+    title: 'Korean Motor Spares',
+    description:
+      'Find trusted Korean motor spares suppliers near you.',
+    url: 'https://koreanmotorsparesnearme.co.za',
+    siteName: 'Korean Motor Spares',
+    type: 'website',
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en-ZA">
+      <head>
+          <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-MC8YDV5NNR"
+          strategy="afterInteractive"
+        />
+        
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-MC8YDV5NNR');
+          `}
+          </Script>
+      </head>
+      <body>
+        <Navbar />
+        <main>{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="app/sitemap.ts">
+// app/sitemap.ts
+import { createClient } from '@/lib/supabase/server'
+
+export default async function sitemap() {
+  const supabase = await createClient()
+
+  const { data: businesses } = await supabase
+    .from('businesses')
+    .select(`
+      slug,
+      updated_at,
+      city,
+      province,
+      city_slug,
+      province_slug
+    `)
+
+  const baseUrl =
+    'https://koreanmotorsparesnearme.co.za'
+
+  // -----------------------------
+  // STATIC PAGES
+  // -----------------------------
+  const staticPages = [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      priority: 1,
+    },
+
+    {
+      url: `${baseUrl}/provinces`,
+      lastModified: new Date(),
+      priority: 0.9,
+    },
+
+    {
+      url: `${baseUrl}/categories`,
+      lastModified: new Date(),
+      priority: 0.9,
+    },
+
+    {
+      url: `${baseUrl}/brands`,
+      lastModified: new Date(),
+      priority: 0.9,
+    },
+
+    {
+      url: `${baseUrl}/contact-us`,
+      lastModified: new Date(),
+      priority: 0.7,
+    },
+
+    {
+      url: `${baseUrl}/claim-business`,
+      lastModified: new Date(),
+      priority: 0.7,
+    },
+
+    {
+      url: `${baseUrl}/add-business`,
+      lastModified: new Date(),
+      priority: 0.7,
+    },
+  ]
+
+  // -----------------------------
+  // LISTINGS
+  // -----------------------------
+  const listingPages =
+    businesses?.map((b) => ({
+      url: `${baseUrl}/listings/${b.slug}`,
+      lastModified: b.updated_at,
+      priority: 0.9,
+      changeFrequency: 'weekly' as const,
+    })) || []
+
+  // -----------------------------
+  // PROVINCES
+  // -----------------------------
+  const provinceMap = new Map()
+
+  businesses?.forEach((b) => {
+    if (!b.province_slug) return
+
+    provinceMap.set(
+      b.province_slug,
+      {
+        url: `${baseUrl}/${b.province_slug}`,
+        lastModified: b.updated_at,
+        priority: 0.8,
+        changeFrequency: 'weekly',
+      }
+    )
+  })
+
+  const provincePages = Array.from(
+    provinceMap.values()
+  )
+
+  // -----------------------------
+  // CITY PAGES
+  // -----------------------------
+  const cityMap = new Map()
+
+  businesses?.forEach((b) => {
+    if (
+      !b.province_slug ||
+      !b.city_slug
+    )
+      return
+
+    const url = `${baseUrl}/${b.province_slug}/${b.city_slug}`
+
+    cityMap.set(url, {
+      url,
+      lastModified: b.updated_at,
+      priority: 0.8,
+      changeFrequency: 'weekly',
+    })
+  })
+
+  const cityPages = Array.from(
+    cityMap.values()
+  )
+
+  // -----------------------------
+  // NEAR ME PAGES
+  // -----------------------------
+  const nearMeMap = new Map()
+
+  businesses?.forEach((b) => {
+    if (!b.city_slug) return
+
+    const url = `${baseUrl}/near-me/${b.city_slug}`
+
+    nearMeMap.set(url, {
+      url,
+      lastModified: b.updated_at,
+      priority: 0.7,
+      changeFrequency: 'weekly',
+    })
+  })
+
+  const nearMePages = Array.from(
+    nearMeMap.values()
+  )
+
+  // -----------------------------
+  // SEO LANDING PAGES
+  // -----------------------------
+  const keywords = [
+    'korean-motor-spares',
+    'kia-spares',
+    'hyundai-spares',
+    'bumper-to-bumper',
+    'auto-parts',
+  ]
+
+  const seoMap = new Map()
+
+  businesses?.forEach((b) => {
+    if (!b.city_slug) return
+
+    keywords.forEach((keyword) => {
+      const url = `${baseUrl}/spares/${keyword}/${b.city_slug}`
+
+      seoMap.set(url, {
+        url,
+        lastModified: b.updated_at,
+        priority: 0.7,
+        changeFrequency: 'weekly',
+      })
+    })
+  })
+
+  const seoPages = Array.from(
+    seoMap.values()
+  )
+
+  return [
+    ...staticPages,
+    ...listingPages,
+    ...provincePages,
+    ...cityPages,
+    ...nearMePages,
+    ...seoPages,
+  ]
+}
+</file>
+
+<file path="components/listings/BusinessCard.tsx">
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { MapPin, Star } from 'lucide-react'
+
+
+export default function BusinessCard({ business }: any) {
+  return (
+    <div>
+      <Link href={`/listings/${business.slug}`}>
+        <h3>{business.name}</h3>
+      </Link>
+
+      <p><MapPin className="inline-block" /> {business.address}</p>
+
+      <p> <Star className="inline-block fill-yellow-400 text-yellow-400" /> {business.rating}</p>
+    </div>
+  )
+}
+
+export async function getBusinessBySlug(slug: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (error) {
+    console.error('getBusinessBySlug error:', error)
+    return null
+  }
+
+  return data
+}
+</file>
+
+<file path="lib/queries/businesses.ts">
+import { createClient } from '@/lib/supabase/server'
+
+export async function getNearbyBusinesses(
+  city: string,
+  province: string,
+  currentSlug: string,
+  limit = 6
+) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('businesses')
+    .select(`
+      id,
+      name,
+      slug,
+      address,
+      city,
+      province,
+      rating
+    `)
+    .eq('city', city)
+    .eq('province', province)
+    .neq('slug', currentSlug)
+    .limit(limit)
+
+  if (error) {
+    console.error('getNearbyBusinesses error:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function searchBusinesses({
+  q,
+}: {
+  q?: string
+}) {
+  const supabase = await createClient()
+
+  let query = supabase.from('businesses').select('*')
+
+  if (q && q.trim() !== '') {
+    const terms = q
+      .toLowerCase()
+      .split(/\s+/) // split by spaces
+      .filter(Boolean)
+
+    const orParts: string[] = []
+
+    terms.forEach((term) => {
+      orParts.push(
+        `name.ilike.%${term}%`,
+        `address.ilike.%${term}%`,
+        `city.ilike.%${term}%`,
+        `province.ilike.%${term}%`,
+        `slug.ilike.%${term}%`
+      )
+    })
+
+    query = query.or(orParts.join(','))
+  }
+
+  const { data, error } = await query.order('rating', {
+    ascending: false,
+  })
+
+  if (error) {
+    console.error('searchBusinesses error:', error)
+
+    return { data: [] }
+  }
+
+  return { data: data || [] }
+}
+</file>
+
+<file path="app/[province]/[city]/page.tsx">
+import type { Metadata } from 'next'
+import { createClient } from '@/lib/supabase/server'
+import { Star, MapPin } from 'lucide-react'
+import Link from 'next/link'
+
+// ✅ Add this metadata function
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ province: string; city: string }>
+}): Promise<Metadata> {
+  const { province, city } = await params
+  
+  const cityName = city.replace(/-/g, ' ')
+  const provinceName = province.replace(/-/g, ' ')
+
+  return {
+    title: `Korean Motor Spares in ${cityName}, ${provinceName} | Best Auto Parts`,
+    description: `Discover ${cityName}'s top Korean motor spares suppliers. Quality Hyundai, Kia, and Korean auto parts in ${cityName}, ${provinceName}. Get quotes and directions.`,
+    keywords: `${cityName} Korean spares, motor parts ${cityName}, auto spares ${cityName}, ${provinceName} car parts, Korean auto parts near me`,
+    alternates: {
+      canonical: `https://koreanmotorsparesnearme.co.za/${province}/${city}`,
+    },
+    openGraph: {
+      title: `Korean Motor Spares in ${cityName}, ${provinceName}`,
+      description: `Find trusted motor spares suppliers in ${cityName}. Compare prices and read customer reviews.`,
+      url: `https://koreanmotorspares.co.za/${province}/${city}`,
+      type: 'website',
+    },
+  }
+}
+
+export default async function CityPage({
+  params,
+}: {
+  params: Promise<{ province: string; city: string }>
+}) {
+  const { province, city } = await params
+
+  const supabase = await createClient()
+
+  const { data: businesses } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('province_slug', province)
+    .eq('city_slug', city)
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-12">
+      <h1 className="text-4xl font-bold">
+        Korean Motor Spares {city.replace(/-/g, ' ')}
+      </h1>
+
+      <p className="mt-4 text-gray-600">
+        Korean Motor Spares and other spare suppliers in {city.replace(/-/g, ' ')}, {province.replace(/-/g, ' ')}
+      </p>
+
+      <div className="mt-10 grid gap-6 md:grid-cols-3">
+        {(businesses || []).map((b) => (
+          <Link
+            key={b.id}
+            href={`/listings/${b.slug}`}
+            className="rounded-xl border p-4 hover:shadow"
+          >
+            <h3 className="font-bold">{b.name}</h3>
+            <p className="text-sm text-gray-600"><MapPin className="inline-block" /> {b.address}</p>
+            <p className="text-sm"><Star className="inline-block fill-yellow-400 text-yellow-400" /> {b.rating || 0}</p>
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
+</file>
+
+<file path="app/listings/[slug]/page.tsx">
+import type { Metadata } from 'next'
+import { createClient } from '@/lib/supabase/server'
+import { generateBusinessDescription } from '@/lib/utils/generateBusinessDescription'
+import { getNearbyBusinesses } from '@/lib/queries/businesses'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { Globe, Mail, MapPin, MessageCircleMore } from 'lucide-react'
+import { PhoneCall } from 'lucide-react'
+import { Star } from 'lucide-react'
+
+// ✅ Enhanced metadata function
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+
+  const supabase = await createClient()
+  
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (!business) {
+    return {
+      title: 'Business Not Found | Korean Motor Spares',
+      description: 'The requested motor spares business could not be found.',
+      robots: { index: false },
+    }
+  }
+
+  const description = business.description || 
+    `Find ${business.name} at ${business.address} in ${business.city}, ${business.province}. Quality Korean motor spares and auto parts.`
+
+  return {
+    title: `${business.name} | Korean Motor Spares in ${business.city}`,
+    description: description,
+    
+    keywords: `${business.name}, ${business.city} motor spares, Korean auto parts, ${business.city} car parts, ${business.province} spares`,
+    
+    alternates: {
+      canonical: `https://koreanmotorsparesnearme.co.za/listings/${business.slug}`,
+    },
+    
+    openGraph: {
+      title: business.name,
+      description: description,
+      url: `https://koreanmotorsparesnearme.co.za/listings/${business.slug}`,
+      type: 'website',
+      images: business.image_url ? [business.image_url] : [],
+      locale: 'en_ZA',
+    },
+    
+    twitter: {
+      card: 'summary',
+      title: business.name,
+      description: description,
+    },
+    
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+  }
+}
+
+export default async function ListingPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+
+  const supabase = await createClient()
+
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (!business) return notFound()
+  
+  const description = business.description || generateBusinessDescription(business)
+
+  const mapQuery = encodeURIComponent(
+    `${business.name}, ${business.address}, ${business.city}, ${business.province}, South Africa`
+  )
+
+  // Add JSON-LD structured data for better SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: business.name,
+    description: description,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: business.address,
+      addressLocality: business.city,
+      addressRegion: business.province,
+      addressCountry: 'ZA',
+    },
+    telephone: business.phone,
+    email: business.email,
+    url: `https://koreanmotorsparesnearme.co.za/listings/${business.slug}`,
+    aggregateRating: business.rating ? {
+      '@type': 'AggregateRating',
+      ratingValue: business.rating,
+      reviewCount: business.review_count || 1,
+    } : undefined,
+  }
+
+  const nearbyBusinesses = await getNearbyBusinesses(
+  business.city,
+  business.province,
+  business.slug
+)
+
+
+const searchSuggestions = [
+  `Hyundai spares ${business.city}`,
+  `Kia spares ${business.city}`,
+  `Korean scrapyards ${business.city}`,
+  `Bumper to bumper ${business.city}`,
+  `Korean motor spares ${business.city}`,
+  `Korean motor spares near ${business.city}`,
+]
+
+
+  return (
+    <>
+      {/* Add JSON-LD script for rich snippets */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        
+        <main className="mx-auto max-w-4xl px-4 py-12">
+          <h1 className="text-4xl font-bold">{business.name}</h1>
+          <p className="mt-6">{description}</p>
+
+          <p className="mt-4 text-gray-600"><MapPin className="inline-block" /> {business.address}</p>
+
+          <p className="mt-2"><Star className="inline-block fill-yellow-400 text-yellow-400" /> {business.rating || 'No ratings yet'}</p>
+          {business.email && (
+            <p className="mt-2"><Mail className="inline-block" /> {business.email}</p>
+          )}
+          {business.website && (
+            <p className="mt-2"><Globe className="inline-block" /> <a href={business.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              {business.website}
+            </a></p>
+          )}
+          <p className="mt-2">
+            {business.whatsapp && (
+              <a
+                className="mt-4 inline-block rounded-lg bg-black px-4 py-2 text-white"
+                href={`https://wa.me/${business.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircleMore className="inline-block" /> WhatsApp
+              </a>
+            )} 
+          </p>
+          <p className="mt-4">
+            {business.phone && (
+              <a
+                href={`tel:${business.phone}`}
+                className="mt-4 inline-block rounded-lg bg-black px-4 py-2 text-white"
+              >
+                <PhoneCall className="inline-block" /> Call Business
+              </a>
+            )}
+          </p>
+          
+          {/* Google Map */}
+          <div className="mt-8 overflow-hidden rounded-2xl border">
+            <iframe
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
+            />
+          </div>
+        </main>
+
+        {/* Nearby Listings */}
+  <section className="mt-16">
+    <h2 className="text-2xl font-bold">
+      Nearby Motor Spares
+    </h2>
+
+    <p className="mt-2 text-gray-600">
+      More motor spares suppliers in{' '}
+      {business.city}.
+    </p>
+
+    <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {nearbyBusinesses.map((item) => (
+        <Link
+          key={item.id}
+          href={`/listings/${item.slug}`}
+          className="rounded-xl border p-4 transition hover:shadow"
+        >
+          <h3 className="font-semibold">
+            {item.name}
+          </h3>
+
+          <p className="mt-2 text-sm text-gray-600"><MapPin className="inline-block" />{' '}
+            {item.address}
+          </p>
+
+          <p className="mt-2 text-sm"><Star className="inline-block fill-yellow-400 text-yellow-400" />{' '}
+            {item.rating || 'No rating'}
+          </p>
+        </Link>
+      ))}
+    </div>
+  </section>
+
+
+  {/* People Also Searched For */}
+  <section className="mt-16">
+    <h2 className="text-2xl font-bold">
+      People Also Searched For
+    </h2>
+
+    <p className="mt-2 text-gray-600">
+      Popular Korean motor spares searches in{' '}
+      {business.city}.
+    </p>
+
+    <div className="mt-6 flex flex-wrap gap-3">
+      {searchSuggestions.map((term) => (
+        <a
+          key={term}
+          href={`/search?q=${encodeURIComponent(term)}`}
+          className="rounded-full border border-stone-300 bg-stone-50 px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600"
+        >
+          {term}
+        </a>
+      ))}
+    </div>
+  </section>
+  {/* Related Searches */}
+      <div className="mt-10 text-sm">
+        <h3 className="font-semibold">Related Searches</h3>
+
+        <ul className="mt-2 space-y-1">
+          <li><a href={`/near-me/${business.city}`}>Motor spares near {business.city}</a></li>
+          <li><a href={`/spares/kia/${business.city}`}>Kia spares {business.city}</a></li>
+          <li><a href={`/spares/korean-motor-spares/${business.city}`}>Korean motor spares {business.city}</a></li>
+          <li><a href={`/spares/bumper-to-bumper/${business.city}`}>Bumper to bumper spares {business.city}</a></li>
+        </ul>
+      </div>
+    </>
+  )
+}
+</file>
+
+<file path="components/layout/Footer.tsx">
+// components/layout/Footer.tsx
+import Link from "next/link";
+import { POPULAR_CITIES, ALL_PROVINCES } from "@/lib/utils";
+
+export function Footer() {
+  return (
+    <footer className="bg-stone-900 text-stone-300 mt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 bg-orange-600 rounded flex items-center justify-center">
+                <span className="text-white font-bold text-xs">KMS</span>
+              </div>
+              <span className="font-bold text-white text-base">
+                Korean MotorSpares Near Me
+              </span>
+            </div>
+            <p className="text-sm text-stone-400 leading-relaxed">
+              South Africa&apos;s largest directory of motor spares suppliers.
+              Find Kia, Hyndai, VW, Toyota and many more spares near you.
+            </p>
+          </div>
+
+          {/* Popular Cities */}
+          <div>
+            <h3 className="text-white font-semibold text-sm mb-3 uppercase tracking-wider">
+              Popular Cities
+            </h3>
+            <ul className="space-y-2">
+              {POPULAR_CITIES.slice(0, 6).map((city) => (
+                <li key={city.slug}>
+                  <Link
+                    href={`/${city.province}/${city.slug}`}
+                    className="text-sm hover:text-orange-400 transition-colors"
+                  >
+                    {city.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Provinces */}
+          <div>
+            <h3 className="text-white font-semibold text-sm mb-3 uppercase tracking-wider">
+              Provinces
+            </h3>
+            <ul className="space-y-2">
+              {ALL_PROVINCES.slice(0, 6).map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={`/${p.slug}`}
+                    className="text-sm hover:text-orange-400 transition-colors"
+                  >
+                    {p.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-white font-semibold text-sm mb-3 uppercase tracking-wider">
+              Quick Links
+            </h3>
+            <ul className="space-y-2">
+              {[
+                { label: "Add a Business", href: "/add-business" },
+                { label: "Claim a Listing", href: "/claim-business" },
+                { label: "All Categories", href: "/categories" },
+                { label: "All Brands", href: "/brands" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm hover:text-orange-400 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-10 pt-8 border-t border-stone-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-stone-500">
+          <p>© {new Date().getFullYear()} KoreanMotorSparesNearMe. All rights reserved.</p>
+          <div className="flex gap-4">
+            <Link href="/privacy" className="hover:text-stone-300">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-stone-300">Terms of Use</Link>
+            <Link href="/contact-us" className="hover:text-stone-300">Contact</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+</file>
+
+<file path="components/search/HeroSearch.tsx">
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { Search } from 'lucide-react'
+
+export default function SearchBar() {
+  const router = useRouter()
+
+  const [query, setQuery] = useState('')
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (!query.trim()) return
+
+    router.push(
+      `/search?q=${encodeURIComponent(query)}`
+    )
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex w-full items-center gap-2"
+    >
+      {/* Input Wrapper */}
+      <div className="relative w-full">
+        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
+
+        <input
+          value={query}
+          onChange={(e) =>
+            setQuery(e.target.value)
+          }
+          placeholder="Search Korean motor spares..."
+          className="w-full rounded-xl border border-stone-300 bg-white py-3 pl-10 pr-4 text-sm outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+        />
+      </div>
+
+      {/* Button */}
+      <button
+        type="submit"
+        className="flex items-center gap-2 rounded-xl bg-orange-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-700"
+      >
+        <Search className="h-4 w-4" />
+        Search
+      </button>
+    </form>
+  )
+}
+</file>
+
+<file path="components/layout/Navbar.tsx">
+import SearchBar from '@/components/search/HeroSearch'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Menu } from 'lucide-react'
+
+export function Navbar() {
+  return (
+    <header className="sticky top-0 z-50 border-b border-stone-200 bg-white shadow-sm">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2"
+        >
+          <div className="flex items-center justify-center overflow-hidden rounded-lg">
+            <Image
+              src="/korean-logo.png"
+              alt="Korean Motor Spares"
+              width={200}
+              height={100}
+              className="h-auto w-auto object-cover"
+              priority
+            />
+          </div>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-6 lg:flex">
+          <Link
+            href="/categories"
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-orange-600"
+          >
+            Categories
+          </Link>
+
+          <Link
+            href="/provinces"
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-orange-600"
+          >
+            Provinces
+          </Link>
+
+          <Link
+            href="/brands"
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-orange-600"
+          >
+            Brands
+          </Link>
+
+          <Link
+            href="/contact"
+            className="text-sm font-medium text-stone-600 transition-colors hover:text-orange-600"
+          >
+            Contact
+          </Link>
+        </nav>
+
+        {/* Search */}
+        <div className="hidden xl:block w-full max-w-md px-6">
+          <SearchBar />
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/add-business"
+            className="hidden rounded-lg border border-orange-200 px-4 py-2 text-sm font-medium text-orange-600 transition-colors hover:bg-orange-50 sm:inline-flex"
+          >
+            + Add Business
+          </Link>
+
+          <Link
+            href="/claim-business"
+            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-700"
+          >
+            Claim Listing
+          </Link>
+
+          {/* Mobile menu icon */}
+          <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-stone-200 lg:hidden">
+            <Menu className="h-5 w-5 text-stone-700" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Search */}
+      <div className="border-t border-stone-100 px-4 py-3 xl:hidden">
+        <SearchBar />
+      </div>
+    </header>
+  )
+}
+</file>
+
+</files>

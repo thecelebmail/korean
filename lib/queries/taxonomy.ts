@@ -1,4 +1,4 @@
-// lib/queries/taxonomy.ts
+export const revalidate = 86400; // Cache pages on Vercel for 24 hours
 import { createClient } from "@/lib/supabase/server";
 import type { Province, City, Category, Brand } from "@/types";
 
