@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+backup1.sql
+backup.sql
+repomix-output.xml
+
 # dependencies
 /node_modules
 /.pnp
