@@ -1,7 +1,10 @@
-// app/categories/page.tsx
+
 
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+
+
+export const revalidate = 86400;
 
 export default async function CategoriesPage() {
   const supabase = await createClient()

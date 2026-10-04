@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
+
+export const revalidate = 86400;
 export default async function BrandsPage() {
   const supabase = await createClient()
 

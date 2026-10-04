@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
-// ✅ Add this metadata function
+export const revalidate = 86400;
 export async function generateMetadata({
   params,
 }: {

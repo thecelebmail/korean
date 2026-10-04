@@ -8,6 +8,8 @@ import { Globe, Mail, MapPin, MessageCircleMore } from 'lucide-react'
 import { PhoneCall } from 'lucide-react'
 import { Star } from 'lucide-react'
 
+
+export const revalidate = 86400;
 // ✅ Enhanced metadata function
 export async function generateMetadata({
   params,

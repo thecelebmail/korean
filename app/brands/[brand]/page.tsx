@@ -3,6 +3,9 @@ import { MapPin, Star } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+
+export const revalidate = 86400;
+
 export default async function BrandPage({
   params,
 }: {
