@@ -1,9 +1,7 @@
-// lib/queries/businesses.ts
 import { createClient } from '@/lib/supabase/server'
 
 /**
  * Fetches nearby alternative listings for individual directory pages.
- * Preserved exactly as needed by app/listings/[slug]/page.tsx
  */
 export async function getNearbyBusinesses(
   city: string,
@@ -30,7 +28,13 @@ export async function getNearbyBusinesses(
     .limit(limit)
 
   if (error) {
-    console.error('getNearbyBusinesses error:', error)
+    console.error('getNearbyBusinesses error:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    })
+
     return []
   }
 
@@ -38,8 +42,7 @@ export async function getNearbyBusinesses(
 }
 
 /**
- * Handles text-based discovery matching. 
- * Optimized to select required view properties only and enforces a strict structural limit.
+ * Searches businesses by name, address, city, province, or slug.
  */
 export async function searchBusinesses({
   q,
@@ -48,51 +51,68 @@ export async function searchBusinesses({
 }) {
   const supabase = await createClient()
 
-  // OPTIMIZATION: Only request required rendering properties, never select('*')
-  let query = supabase.from('businesses').select(`
-    id,
-    name,
-    slug,
-    address,
-    city,
-    province,
-    rating,
-    tier,
-    image_url
-  `)
+  let query = supabase
+    .from('businesses')
+    .select(`
+      id,
+      name,
+      slug,
+      address,
+      city,
+      province,
+      rating,
+      tier,
+      image_url
+    `)
 
-  if (q && q.trim() !== '') {
-    const terms = q
+  const searchTerm = q?.trim()
+
+  if (searchTerm) {
+    const terms = searchTerm
       .toLowerCase()
-      .split(/\s+/) // split by spaces
+      .split(/\s+/)
       .filter(Boolean)
 
-    const orParts: string[] = []
+    const orParts = terms.flatMap((term) => {
+      const safeTerm = term.replace(/[%_,()]/g, '')
 
-    terms.forEach((term) => {
-      orParts.push(
-        `name.ilike.%${term}%`,
-        `address.ilike.%${term}%`,
-        `city.ilike.%${term}%`,
-        `province.ilike.%${term}%`,
-        `slug.ilike.%${term}%`
-      )
+      if (!safeTerm) {
+        return []
+      }
+
+      return [
+        `name.ilike.%${safeTerm}%`,
+        `address.ilike.%${safeTerm}%`,
+        `city.ilike.%${safeTerm}%`,
+        `province.ilike.%${safeTerm}%`,
+        `slug.ilike.%${safeTerm}%`,
+      ]
     })
 
-    query = query.or(orParts.join(','))
+    if (orParts.length > 0) {
+      query = query.or(orParts.join(','))
+    }
   }
 
-  // OPTIMIZATION: Order listings by priority score, limiting response depth to 20 profiles per query page
   const { data, error } = await query
     .order('rating', {
       ascending: false,
+      nullsFirst: false,
     })
     .limit(20)
 
   if (error) {
-    console.error('searchBusinesses error:', error)
+    console.error('searchBusinesses error:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    })
+
     return { data: [] }
   }
 
-  return { data: data || [] }
+  return {
+    data: data || [],
+  }
 }

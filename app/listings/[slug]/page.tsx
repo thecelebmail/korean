@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
+import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { generateBusinessDescription } from '@/lib/utils/generateBusinessDescription'
 import { getNearbyBusinesses } from '@/lib/queries/businesses'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Globe, Mail, MapPin, MessageCircleMore } from 'lucide-react'
-import { PhoneCall } from 'lucide-react'
-import { Star } from 'lucide-react'
+import { PhoneCall,  ShieldCheck, Loader2, Star, Globe, Mail, MapPin, MessageCircleMore   } from 'lucide-react'
+
 
 
 export const revalidate = 86400;
@@ -33,6 +33,7 @@ export async function generateMetadata({
       robots: { index: false },
     }
   }
+  
 
   const description = business.description || 
     `Find ${business.name} at ${business.address} in ${business.city}, ${business.province}. Quality Korean motor spares and auto parts.`
@@ -74,6 +75,48 @@ export async function generateMetadata({
       },
     },
   }
+}
+
+export function ClaimListingButton({ businessId, currentClaimStatus }: { businessId: string, currentClaimStatus: string }) {
+  const [status, setStatus] = useState(currentClaimStatus)
+  const [submitting, setSubmitting] = useState(false)
+
+  const processClaimSubmission = async () => {
+    if (status !== 'unclaimed') return
+    setSubmitting(true)
+
+    const res = await fetch('/api/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ businessId })
+    })
+
+    const data = await res.json()
+    setSubmitting(false)
+
+    if (data.success) {
+      setStatus('pending')
+    } else {
+      alert(data.error || 'Authentication sequence failed.')
+    }
+  }
+
+  if (status === 'claimed') return null
+
+  return (
+    <button
+      disabled={submitting || status === 'pending'}
+      onClick={processClaimSubmission}
+      className={`inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg border transition ${
+        status === 'pending'
+          ? 'bg-yellow-50 text-yellow-700 border-yellow-200 cursor-not-allowed'
+          : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
+      }`}
+    >
+      {submitting ? <Loader2 className="h-4 w-4 animate-spin text-gray-400" /> : <ShieldCheck className={`h-4 w-4 ${status === 'pending' ? 'text-yellow-600' : 'text-blue-600'}`} />}
+      {status === 'pending' ? 'Verification Review Pending' : 'Own this spares shop? Claim Listing'}
+    </button>
+  )
 }
 
 export default async function ListingPage({

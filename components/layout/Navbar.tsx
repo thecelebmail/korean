@@ -49,7 +49,7 @@ export function Navbar() {
           </Link>
 
           <Link
-            href="/contact"
+            href="/contact-us"
             className="text-sm font-medium text-stone-600 transition-colors hover:text-orange-600"
           >
             Contact

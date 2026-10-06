@@ -8,6 +8,7 @@ import {
   Star,
 } from 'lucide-react'
 
+
 export default async function SearchPage({
   searchParams,
 }: {
