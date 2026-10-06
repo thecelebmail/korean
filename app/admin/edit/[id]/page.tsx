@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ShieldAlert, Check, XCircle } from 'lucide-react'
+import AdminListingActions from '@/components/admin/AdminListingActions'
 
 interface AdminPageProps {
   params: Promise<{ id: string }>
@@ -48,12 +49,10 @@ export default async function AdminManagementProfilePage({ params }: AdminPagePr
         <div className="space-y-4">
           <h3 className="font-bold text-gray-800 text-lg">Administrative Workflow Tasks</h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <button className="flex items-center justify-center gap-2 rounded-lg bg-green-600 p-3 font-semibold text-white shadow hover:bg-green-700 transition">
-              <Check className="h-5 w-5" /> Approve Profile Claim
-            </button>
-            <button className="flex items-center justify-center gap-2 rounded-lg bg-red-600 p-3 font-semibold text-white shadow hover:bg-red-700 transition">
-              <XCircle className="h-5 w-5" /> Suspend Storefront Listing
-            </button>
+              <AdminListingActions
+                  businessId={shop.id}
+                  claimStatus={shop.claim_status}
+                />
           </div>
         </div>
       </div>
