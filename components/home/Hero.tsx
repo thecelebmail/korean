@@ -33,7 +33,7 @@ export default function Hero() {
             Korean Motor Spares Near Me
           </h1>
 
-          {/* Supporting SEO Copy */}
+         
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-stone-600 md:text-xl">
             Find trusted Korean motor spares suppliers, Hyundai spares,
             Kia spares, Korean scrapyards, engines, body parts,
