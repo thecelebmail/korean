@@ -1,193 +1,79 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/auth/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL
+export const runtime = 'nodejs'
+
+type AdminAction = 'approve_claim' | 'reject_claim' | 'suspend_listing'
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user || !ADMIN_EMAIL || user.email !== ADMIN_EMAIL) {
-    return NextResponse.json(
-      { error: 'Forbidden' },
-      { status: 403 }
-    )
-  }
+  const auth = await requireAdmin()
+  if (!auth.authorized) return auth.response
 
   try {
-    const { businessId, action } = await request.json()
-
-    if (!businessId || !action) {
-      return NextResponse.json(
-        { error: 'businessId and action are required.' },
-        { status: 400 }
-      )
+    const body: unknown = await request.json()
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'A valid request body is required.' }, { status: 400 })
+    }
+    const input = body as Record<string, unknown>
+    const businessId = input.businessId
+    const action = input.action
+    if (typeof businessId !== 'string' || !businessId.trim()) {
+      return NextResponse.json({ error: 'businessId is required.' }, { status: 400 })
+    }
+    if (action !== 'approve_claim' && action !== 'reject_claim' && action !== 'suspend_listing') {
+      return NextResponse.json({ error: 'Unsupported administrative action.' }, { status: 400 })
     }
 
-    // --------------------------------------------------
-    // APPROVE CLAIM
-    // --------------------------------------------------
+    const { data: { user }, error: userError } = await auth.supabase.auth.getUser()
+    if (userError || !user) return NextResponse.json({ error: 'Administrator session expired.' }, { status: 401 })
 
-    if (action === 'approve_claim') {
-      const { data: business, error: businessError } =
-        await supabase
-          .from('businesses')
-          .select('id, claim_status')
-          .eq('id', businessId)
-          .single()
-
-      if (businessError || !business) {
-        return NextResponse.json(
-          { error: 'Business not found.' },
-          { status: 404 }
-        )
-      }
-
-      if (business.claim_status !== 'pending') {
-        return NextResponse.json(
-          {
-            error:
-              'This listing does not have a pending claim.',
-          },
-          { status: 400 }
-        )
-      }
-
-      const { data: relationship, error: relationshipError } =
-        await supabase
-          .from('business_owners')
-          .select('owner_id, is_primary')
-          .eq('business_id', businessId)
-          .eq('is_primary', true)
-          .maybeSingle()
-
-      if (relationshipError) {
-        throw relationshipError
-      }
-
-      if (!relationship) {
-        return NextResponse.json(
-          {
-            error:
-              'No owner relationship exists for this claim.',
-          },
-          { status: 400 }
-        )
-      }
-
-      const { error: updateError } = await supabase
-        .from('businesses')
-        .update({
-          claim_status: 'claimed',
-          is_verified: true,
-          status: 'active',
-          claimed_at: new Date().toISOString(),
-        })
-        .eq('id', businessId)
-        .eq('claim_status', 'pending')
-
-      if (updateError) {
-        throw updateError
-      }
-
-      return NextResponse.json({
-        success: true,
-        message: 'Claim approved successfully.',
-      })
-    }
-
-    // --------------------------------------------------
-    // SUSPEND LISTING
-    // --------------------------------------------------
-
-    if (action === 'suspend_listing') {
-      const { error } = await supabase
-        .from('businesses')
-        .update({
-          status: 'suspended',
-        })
-        .eq('id', businessId)
-
-      if (error) {
-        throw error
-      }
-
-      return NextResponse.json({
-        success: true,
-        message: 'Listing suspended.',
-      })
-    }
-
-    // --------------------------------------------------
-    // REJECT CLAIM
-    // --------------------------------------------------
-
-    if (action === 'reject_claim') {
-      const { data: business, error: businessError } =
-        await supabase
-          .from('businesses')
-          .select('id, claim_status')
-          .eq('id', businessId)
-          .single()
-
-      if (businessError || !business) {
-        return NextResponse.json(
-          { error: 'Business not found.' },
-          { status: 404 }
-        )
-      }
-
-      if (business.claim_status !== 'pending') {
-        return NextResponse.json(
-          {
-            error:
-              'This listing does not have a pending claim.',
-          },
-          { status: 400 }
-        )
-      }
-
-      await supabase
-        .from('business_owners')
-        .delete()
+    const admin = createAdminClient()
+    if (action === 'approve_claim' || action === 'reject_claim') {
+      const { data: pendingClaims, error: claimsError } = await admin
+        .from('claim_requests')
+        .select('id')
         .eq('business_id', businessId)
-
-      const { error: updateError } = await supabase
-        .from('businesses')
-        .update({
-          claim_status: 'unclaimed',
-          is_verified: false,
-        })
-        .eq('id', businessId)
-
-      if (updateError) {
-        throw updateError
+        .eq('status', 'pending')
+        .limit(2)
+      if (claimsError) {
+        console.error('Pending claim lookup failed:', claimsError.message)
+        return NextResponse.json({ error: 'Unable to find a pending claim for this business.' }, { status: 500 })
       }
-
-      return NextResponse.json({
-        success: true,
-        message: 'Claim rejected.',
+      if (!pendingClaims || pendingClaims.length === 0) {
+        return NextResponse.json({ error: 'No pending claim request exists for this business. Review legacy pending records separately.' }, { status: 409 })
+      }
+      if (pendingClaims.length > 1) {
+        return NextResponse.json({ error: 'More than one claim is pending for this business. Review the individual requests from the admin dashboard.' }, { status: 409 })
+      }
+      const { data, error } = await admin.rpc('review_claim_request', {
+        p_claim_id: pendingClaims[0].id,
+        p_action: action === 'approve_claim' ? 'approve' : 'reject',
+        p_reviewer_id: user.id,
+        p_rejection_reason: null,
       })
+      if (error) {
+        const conflict = /already been reviewed|already claimed|not found|changed/i.test(error.message || '')
+        return NextResponse.json({ error: conflict ? error.message : 'Unable to review this claim right now.' }, { status: conflict ? 409 : 500 })
+      }
+      return NextResponse.json({ success: true, message: action === 'approve_claim' ? 'Claim approved successfully.' : 'Claim rejected successfully.', result: data })
     }
 
-    return NextResponse.json(
-      { error: 'Unsupported administrative action.' },
-      { status: 400 }
-    )
+    const { data, error } = await admin
+      .from('businesses')
+      .update({ status: 'suspended', updated_at: new Date().toISOString() })
+      .eq('id', businessId)
+      .select('id')
+      .maybeSingle()
+    if (error) {
+      console.error('Listing suspension failed:', error.message)
+      return NextResponse.json({ error: 'Unable to suspend listing.' }, { status: 500 })
+    }
+    if (!data) return NextResponse.json({ error: 'Business not found.' }, { status: 404 })
+    return NextResponse.json({ success: true, message: 'Listing suspended successfully.' })
   } catch (error) {
-    console.error('Admin action error:', error)
-
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Administrative operation failed.',
-      },
-      { status: 500 }
-    )
+    if (error instanceof SyntaxError) return NextResponse.json({ error: 'Request body must contain valid JSON.' }, { status: 400 })
+    console.error('Admin action failed:', error)
+    return NextResponse.json({ error: 'Unexpected administrative error.' }, { status: 500 })
   }
 }

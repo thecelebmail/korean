@@ -16,14 +16,25 @@ export default function VendorEditForm() {
   const [saving, setSaving] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
   const [formData, setFormData] = useState({
-    name: '', phone: '', alt_number: '', whatsapp: '',
-    email: '', website: '', address: '', description: ''
-  })
+  name: '',
+  phone: '',
+  alt_phone: '',
+  whatsapp: '',
+  email: '',
+  website: '',
+  address: '',
+  description: '',
+})
 
   useEffect(() => {
     async function loadShopData() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return router.push('/login')
+      if (!user) {
+          router.replace(
+            `/auth?next=${encodeURIComponent(`/dashboard/edit/${id}`)}`,
+          )
+          return
+        }
 
       const { data: shop, error } = await supabase
         .from('businesses')
@@ -32,42 +43,54 @@ export default function VendorEditForm() {
         .single()
 
       if (!error && shop) {
-        setFormData({
-          name: shop.name || '',
-          phone: shop.phone || '',
-          alt_number: shop.alt_number || '',
-          whatsapp: shop.whatsapp || '',
-          email: shop.email || '',
-          website: shop.website || '',
-          address: shop.address || '',
-          description: shop.description || ''
-        })
+      setFormData({
+        name: shop.name || '',
+        phone: shop.phone || '',
+        alt_phone: shop.alt_phone || '',
+        whatsapp: shop.whatsapp || '',
+        email: shop.email || '',
+        website: shop.website || '',
+        address: shop.address || '',
+        description: shop.description || '',
+      })
       }
       setLoading(false)
     }
     loadShopData()
   }, [id, router, supabase])
 
-  const handleFormSubmission = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setStatusMsg('')
 
+const handleFormSubmission = async (
+  e: React.FormEvent<HTMLFormElement>,
+) => {
+  e.preventDefault()
+  setSaving(true)
+  setStatusMsg('')
+
+  try {
     const response = await fetch('/api/vendor/edit', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, ...formData })
+      body: JSON.stringify({ id, ...formData }),
     })
 
     const result = await response.json()
-    setSaving(false)
-    if (result.success) {
-      setStatusMsg('Storefront listing synchronized successfully!')
-      setTimeout(() => setStatusMsg(''), 4000)
-    } else {
-      setStatusMsg(`Error: ${result.error}`)
+
+    if (!response.ok || !result.success) {
+      setStatusMsg(
+        `Error: ${result.error || 'Unable to save listing.'}`,
+      )
+      return
     }
+
+    setStatusMsg('Listing updated successfully!')
+    router.refresh()
+  } catch {
+    setStatusMsg('Error: Network error. Please try again.')
+  } finally {
+    setSaving(false)
   }
+}
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin text-blue-600 h-8 w-8" /></div>
@@ -98,7 +121,7 @@ export default function VendorEditForm() {
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Alt Phone Line</label>
-              <input type="text" value={formData.alt_number} onChange={e => setFormData({...formData, alt_number: e.target.value})} className="w-full border rounded-lg p-2.5 text-sm bg-white" />
+    
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase mb-2">WhatsApp Line</label>

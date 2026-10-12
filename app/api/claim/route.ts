@@ -1,169 +1,68 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    )
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Please sign in before claiming a business.' }, { status: 401 })
+  }
+  if (!user.email) {
+    return NextResponse.json({ error: 'Your account needs a verified email address to submit a claim.' }, { status: 400 })
   }
 
   try {
-    const { businessId } = await request.json()
-
-    if (!businessId) {
-      return NextResponse.json(
-        { error: 'Business ID is required' },
-        { status: 400 }
-      )
+    const body: unknown = await request.json()
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'A valid request body is required.' }, { status: 400 })
+    }
+    const businessId = (body as Record<string, unknown>).businessId
+    if (typeof businessId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(businessId)) {
+      return NextResponse.json({ error: 'A valid business ID is required.' }, { status: 400 })
     }
 
-    // --------------------------------------------------
-    // 1. Find the business
-    // --------------------------------------------------
-
-    const { data: business, error: businessError } = await supabase
-      .from('businesses')
-      .select('id, name, claim_status')
-      .eq('id', businessId)
-      .single()
-
-    if (businessError || !business) {
-      return NextResponse.json(
-        { error: 'Listing entity not found' },
-        { status: 404 }
-      )
-    }
-
-    if (business.claim_status === 'claimed') {
-      return NextResponse.json(
-        { error: 'This business has already been claimed.' },
-        { status: 409 }
-      )
-    }
-
-    if (business.claim_status === 'pending') {
-      return NextResponse.json(
-        { error: 'This business already has a pending claim.' },
-        { status: 409 }
-      )
-    }
-
-    // --------------------------------------------------
-    // 2. Find or create the public owner profile
-    // --------------------------------------------------
-
-    let { data: owner, error: ownerLookupError } = await supabase
+    const admin = createAdminClient()
+    const { data: existingOwner, error: ownerLookupError } = await admin
       .from('owners')
-      .select('id, email, auth_user_id')
+      .select('id, auth_user_id')
       .eq('auth_user_id', user.id)
       .maybeSingle()
 
-    if (ownerLookupError) {
-      throw ownerLookupError
+    if (ownerLookupError) throw ownerLookupError
+
+    let ownerId = existingOwner?.id
+    if (!ownerId) {
+      const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0]
+      const { data: owner, error: ownerInsertError } = await admin
+        .from('owners')
+        .upsert({ auth_user_id: user.id, email: user.email, name: String(displayName).slice(0, 200) }, { onConflict: 'auth_user_id' })
+        .select('id')
+        .single()
+      if (ownerInsertError) throw ownerInsertError
+      ownerId = owner.id
     }
 
-    if (!owner) {
-      const { data: newOwner, error: ownerCreateError } =
-        await supabase
-          .from('owners')
-          .insert({
-            auth_user_id: user.id,
-            name:
-              user.user_metadata?.full_name ||
-              user.user_metadata?.name ||
-              user.email?.split('@')[0] ||
-              'Business Owner',
-            email: user.email,
-          })
-          .select('id, email, auth_user_id')
-          .single()
-
-      if (ownerCreateError) {
-        throw ownerCreateError
-      }
-
-      owner = newOwner
-    }
-
-    // --------------------------------------------------
-    // 3. Make sure this owner isn't already connected
-    // --------------------------------------------------
-
-    const { data: existingRelationship, error: relationshipError } =
-      await supabase
-        .from('business_owners')
-        .select('business_id, owner_id')
-        .eq('business_id', businessId)
-        .eq('owner_id', owner.id)
-        .maybeSingle()
-
-    if (relationshipError) {
-      throw relationshipError
-    }
-
-    if (existingRelationship) {
-      return NextResponse.json(
-        { error: 'You already submitted a claim for this listing.' },
-        { status: 409 }
-      )
-    }
-
-    // --------------------------------------------------
-    // 4. Create owner/business relationship
-    // --------------------------------------------------
-
-    const { error: linkError } = await supabase
-      .from('business_owners')
-      .insert({
-        business_id: businessId,
-        owner_id: owner.id,
-        is_primary: true,
-        assigned_at: new Date().toISOString(),
-      })
-
-    if (linkError) {
-      throw linkError
-    }
-
-    // --------------------------------------------------
-    // 5. Mark business as pending
-    // --------------------------------------------------
-
-    const { error: updateError } = await supabase
-      .from('businesses')
-      .update({
-        claim_status: 'pending',
-      })
-      .eq('id', businessId)
-      .eq('claim_status', 'unclaimed')
-
-    if (updateError) {
-      throw updateError
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Claim request submitted for verification.',
+    const { data, error } = await admin.rpc('submit_claim_request', {
+      p_business_id: businessId,
+      p_owner_id: ownerId,
     })
-  } catch (error) {
-    console.error('Claim submission error:', error)
 
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Unable to submit claim request.',
-      },
-      { status: 500 }
-    )
+    if (error) {
+      const message = error.message || 'Unable to submit claim.'
+      const conflict = /already been claimed|pending claim|already has a pending|duplicate key/i.test(message)
+      return NextResponse.json({ error: conflict ? message : 'Unable to submit the claim right now.' }, { status: conflict ? 409 : 500 })
+    }
+
+    return NextResponse.json({ success: true, message: 'Your claim has been submitted for administrator review.', claim: data }, { status: 201 })
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: 'Request body must contain valid JSON.' }, { status: 400 })
+    }
+    console.error('Claim submission failed:', error)
+    return NextResponse.json({ error: 'Unable to submit the claim right now.' }, { status: 500 })
   }
 }
