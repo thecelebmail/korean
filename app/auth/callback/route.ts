@@ -1,24 +1,28 @@
 
-// app/auth/callback/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(request: Request) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
-  const requestedNext = requestUrl.searchParams.get('next')
+function safeRedirectPath(value: string | null): string {
+  if (
+    !value ||
+    !value.startsWith('/') ||
+    value.startsWith('//') ||
+    value.startsWith('/auth')
+  ) {
+    return '/dashboard'
+  }
 
-  // Accept only local relative paths to prevent open redirects.
-  const safeNext =
-    requestedNext?.startsWith('/') &&
-    !requestedNext.startsWith('//') &&
-    !requestedNext.startsWith('/\\')
-      ? requestedNext
-      : '/dashboard'
+  return value
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url)
+  const code = url.searchParams.get('code')
+  const nextPath = safeRedirectPath(url.searchParams.get('next'))
 
   if (!code) {
     return NextResponse.redirect(
-      new URL('/auth?error=auth_callback_failed', requestUrl.origin)
+      new URL('/auth?error=confirmation', url.origin),
     )
   }
 
@@ -26,13 +30,12 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    console.error('Supabase auth callback failed:', error.message)
+    console.error('Email confirmation callback failed:', error.message)
 
     return NextResponse.redirect(
-      new URL('/auth?error=auth_callback_failed', requestUrl.origin)
+      new URL('/auth?error=confirmation', url.origin),
     )
   }
 
-  return NextResponse.redirect(new URL(safeNext, requestUrl.origin))
+  return NextResponse.redirect(new URL(nextPath, url.origin))
 }
-

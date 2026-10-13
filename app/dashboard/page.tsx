@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ArrowRight, Edit3, Store, UserCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import SignOutButton from '@/components/auth/SignOutButton'
 
 type ClaimRecord = {
   id: number
@@ -98,7 +99,9 @@ export default async function VendorDashboardPage() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div><h1 className="text-3xl font-bold tracking-tight text-gray-900">Business Dashboard</h1><p className="mt-1 text-sm text-gray-600">Signed in as {user.email}</p></div>
-          <div className={`inline-flex items-center gap-2 self-start rounded-lg border px-3 py-2 text-sm font-medium ${hasApprovedListing ? 'border-green-200 bg-green-50 text-green-800' : 'border-gray-200 bg-white text-gray-600'}`}><UserCheck className="h-4 w-4" />{hasApprovedListing ? 'Approved business access' : 'Account active'}</div>
+          <div className={`inline-flex items-center gap-2 self-start rounded-lg border px-3 py-2 text-sm font-medium ${hasApprovedListing ? 'border-green-200 bg-green-50 text-green-800' : 'border-gray-200 bg-white text-gray-600'}`}><UserCheck className="h-4 w-4" />{hasApprovedListing ? 'Approved business access' : 'Account active'}
+          <SignOutButton redirectTo="/auth?message=signed-out" />
+          </div>
         </header>
 
         <section className="mb-10 rounded-xl border bg-white shadow-sm">

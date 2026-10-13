@@ -4,6 +4,7 @@ import { AlertCircle, Building2, CheckCircle2, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import AdminClaimReview from './AdminClaimReview'
+import SignOutButton from '@/components/auth/SignOutButton'
 
 type ClaimRow = {
   id: number
@@ -27,7 +28,7 @@ export default async function AdminDashboardPage() {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) redirect('/auth?next=/admin')
-  if (user.email?.trim().toLowerCase() !== adminEmail) redirect('/')
+  if (user.email?.trim().toLowerCase() !== adminEmail) redirect('/admin/login?error=not-admin')
 
   const admin = createAdminClient()
   const [totalResult, pendingResult, listingsResult, claimsResult] = await Promise.all([
@@ -78,6 +79,7 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
           <p className="text-sm text-gray-500">Administrator: {user.email}</p>
+          <SignOutButton redirectTo="/admin/login" label="Admin sign out" />
         </header>
 
         <section className="mb-8 grid gap-4 sm:grid-cols-2">
