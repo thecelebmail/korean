@@ -10,13 +10,9 @@ export default function BusinessCard({ business }: any) {
         <h3>{business.name}</h3>
       </Link>
 
-      <p><MapPin className="inline-block" /> 
-        {business.address}
-      </p>
+      <p><MapPin className="inline-block" /> {business.address}</p>
 
-      <p> <Star className="inline-block fill-yellow-400 text-yellow-400" /> 
-        {business.rating}
-      </p>
+      <p> <Star className="inline-block fill-yellow-400 text-yellow-400" /> {business.rating}</p>
     </div>
   )
 }

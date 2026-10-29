@@ -33,7 +33,7 @@ export default function Hero() {
             Korean Motor Spares Near Me
           </h1>
 
-          {/* Supporting SEO Copy */}
+         
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-stone-600 md:text-xl">
             Find trusted Korean motor spares suppliers, Hyundai spares,
             Kia spares, Korean scrapyards, engines, body parts,
@@ -79,6 +79,34 @@ export default function Hero() {
 
               <p className="mt-1 text-sm text-stone-600">
                 Listings Across South Africa
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                <Wrench className="h-6 w-6 text-orange-600" />
+              </div>
+
+              <p className="mt-4 text-3xl font-bold text-stone-900">
+                500k+
+              </p>
+
+              <p className="mt-1 text-sm text-stone-600">
+                Korean Vehicle Parts
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                <Truck className="h-6 w-6 text-orange-600" />
+              </div>
+
+              <p className="mt-4 text-3xl font-bold text-stone-900">
+                Nationwide
+              </p>
+
+              <p className="mt-1 text-sm text-stone-600">
+                Delivery & Courier Support
               </p>
             </div>
 

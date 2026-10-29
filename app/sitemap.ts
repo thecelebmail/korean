@@ -63,6 +63,12 @@ export default async function sitemap() {
       lastModified: new Date(),
       priority: 0.7,
     },
+       {
+      url: `${baseUrl}/cross-reference`,
+      lastModified: new Date(),
+      priority: 0.7,
+    },
+    
   ]
 
   // -----------------------------

@@ -1,56 +1,40 @@
-import { ShieldCheck, Wrench } from 'lucide-react'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import ClaimBusinessForm from './ClaimBusinessForm'
 
-export default function ClaimBusinessPage() {
+export default async function ClaimBusinessPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth?next=/claim-business')
+
+  const admin = createAdminClient()
+  const businesses: Array<{ id: string; name: string; city: string; province: string; claim_status: string }> = []
+  const pageSize = 1000
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await admin
+      .from('businesses')
+      .select('id, name, city, province, claim_status')
+      .eq('status', 'active')
+      .is('deleted_at', null)
+      .eq('claim_status', 'unclaimed')
+      .order('name', { ascending: true })
+      .range(from, from + pageSize - 1)
+    if (error) {
+      console.error('Claim page business lookup failed:', error.message)
+      throw new Error('Unable to load claimable businesses.')
+    }
+    businesses.push(...(data ?? []))
+    if (!data || data.length < pageSize) break
+  }
+
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16">
-      <div className="rounded-2xl border bg-white p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
-          <ShieldCheck className="h-10 w-10 text-green-600" />
-
-          <h1 className="text-4xl font-bold">
-            Claim Your Business
-          </h1>
-        </div>
-
-        <p className="text-lg text-gray-600">
-          Own a motor spares business listed on our
-          directory? Claim your listing to update
-          contact details, add photos, improve SEO,
-          and manage your business profile.
-        </p>
-
-        <div className="mt-8 rounded-xl border border-yellow-200 bg-yellow-50 p-5">
-          <div className="flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-yellow-700" />
-
-            <p className="font-semibold text-yellow-800">
-              Feature Not Yet Functional, however you can reach out to us via the contact page to get your business claimed early.
-            </p>
-          </div>
-
-          <p className="mt-2 text-sm text-yellow-700">
-            Business claiming is currently under
-            development and will be available soon.
-          </p>
-        </div>
-
-        <div className="mt-10">
-          <h2 className="text-2xl font-semibold">
-            Benefits of Claiming
-          </h2>
-
-          <ul className="mt-4 space-y-3 text-gray-700">
-            <li>• Update business information</li>
-
-            <li>• Add WhatsApp and website links</li>
-
-            <li>• Upload logos and business photos</li>
-
-            <li>• Improve visibility in search results</li>
-
-            <li>• Respond to customer enquiries</li>
-          </ul>
-        </div>
+    <main className="mx-auto max-w-3xl px-4 py-12">
+      <div className="rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-wide text-orange-700">Business ownership</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900">Claim your business</h1>
+        <p className="mt-3 text-gray-600">Choose your listing and submit a request for administrator review. You will only be able to edit the listing after approval.</p>
+        <ClaimBusinessForm businesses={businesses} />
       </div>
     </main>
   )

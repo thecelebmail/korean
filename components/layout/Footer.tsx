@@ -1,10 +1,21 @@
 // components/layout/Footer.tsx
 import Link from "next/link";
 import { POPULAR_CITIES, ALL_PROVINCES } from "@/lib/utils";
+import Image from 'next/image'
 
 export function Footer() {
   return (
     <footer className="bg-stone-900 text-stone-300 mt-20">
+         <div className="w-full overflow-hidden">
+         <Image
+            src="/logo-footer.png"
+            alt="Korean Motor Spares"
+            width={1600}
+            height={100}
+            className="w-full h-auto object-cover block"
+            priority
+          />
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
