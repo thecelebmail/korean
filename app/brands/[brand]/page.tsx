@@ -1,71 +1,199 @@
-import { createClient } from '@/lib/supabase/server'
-import { MapPin, Star } from 'lucide-react'
-import Link from 'next/link'
+
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { MapPin } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 
-export default async function BrandPage({
-  params,
-}: {
+type Props = {
   params: Promise<{ brand: string }>
-}) {
-  const { brand } = await params
+}
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { brand } = await params
   const supabase = await createClient()
 
-  // Get brand
-  const { data: brandData } = await supabase
+  const { data } = await supabase
     .from('brands')
-    .select('*')
+    .select('name')
     .eq('slug', brand)
-    .single()
+    .maybeSingle()
 
-  if (!brandData) {
-    return notFound()
+  if (!data) {
+    return {
+      title: 'Brand Not Found | Korean Motor Spares',
+      robots: { index: false, follow: true },
+    }
   }
 
-  // Get businesses linked to brand
-  const { data: linkedBusinesses } = await supabase
+  return {
+    title: `${data.name} Spares Suppliers in South Africa`,
+    description: `Browse businesses listed for ${data.name} motor spares in South Africa. Check supplier locations and contact details to confirm parts availability.`,
+    alternates: {
+      canonical: `https://koreanmotorsparesnearme.co.za/brands/${brand}`,
+    },
+    openGraph: {
+      title: `${data.name} Spares Suppliers in South Africa`,
+      description: `Browse listed suppliers and their contact details for ${data.name} spares.`,
+      url: `https://koreanmotorsparesnearme.co.za/brands/${brand}`,
+      type: 'website',
+    },
+  }
+}
+
+export default async function BrandPage({ params }: Props) {
+  const { brand } = await params
+  const supabase = await createClient()
+
+  const { data: brandData, error: brandError } = await supabase
+    .from('brands')
+    .select('id, name, slug')
+    .eq('slug', brand)
+    .maybeSingle()
+
+  if (brandError) {
+    console.error('Failed to load brand:', brandError.message)
+    throw new Error('Unable to load this brand.')
+  }
+
+  if (!brandData) notFound()
+
+  const { data: links, error: linksError } = await supabase
     .from('business_brands')
-    .select(`
-      business:businesses(*)
-    `)
+    .select('business_id')
     .eq('brand_id', brandData.id)
 
-  const businesses =
-    linkedBusinesses?.map((item: any) => item.business) || []
+  if (linksError) {
+    console.error('Failed to load brand links:', linksError.message)
+    throw new Error('Unable to load brand listings.')
+  }
+
+  const businessIds = [
+    ...new Set((links ?? []).map((link) => link.business_id).filter(Boolean)),
+  ]
+
+  let businesses: {
+    id: string
+    name: string
+    slug: string
+    address: string | null
+    city: string
+    province: string
+    phone: string | null
+    website: string | null
+  }[] = []
+
+  if (businessIds.length > 0) {
+    const { data, error } = await supabase
+      .from('businesses')
+      .select('id, name, slug, address, city, province, phone, website')
+      .in('id', businessIds)
+      .eq('status', 'active')
+      .is('deleted_at', null)
+      .order('name')
+      .limit(100)
+
+    if (error) {
+      console.error('Failed to load brand businesses:', error.message)
+      throw new Error('Unable to load brand listings.')
+    }
+
+    businesses = data ?? []
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-4xl font-bold">
-        {brandData.name} Spares
-      </h1>
+      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-gray-500">
+        <Link href="/" className="hover:underline">Home</Link>
+        {' / '}
+        <Link href="/brands" className="hover:underline">Brands</Link>
+        {' / '}
+        <span>{brandData.name}</span>
+      </nav>
 
-      <p className="mt-4 text-gray-600">
-        Find trusted {brandData.name} spares suppliers across South Africa.
+      <header className="max-w-3xl">
+        <h1 className="text-3xl font-bold md:text-4xl">
+          {brandData.name} Spares Suppliers
+        </h1>
+        <p className="mt-4 leading-7 text-gray-600">
+          Browse businesses associated with {brandData.name} spares. Contact
+          a supplier to check availability, vehicle compatibility, condition,
+          pricing, and any delivery options before travelling or ordering.
+        </p>
+      </header>
+
+      <p className="mt-6 text-sm text-gray-500">
+        {businesses.length} {businesses.length === 1 ? 'listing' : 'listings'} shown
+        {businesses.length === 100 ? ' (maximum displayed on this page)' : ''}.
       </p>
 
-      <div className="mt-10 grid gap-6 md:grid-cols-3">
-        {businesses.map((business: any) => (
+      {businesses.length === 0 ? (
+        <section className="mt-8 rounded-xl border p-6">
+          <h2 className="text-lg font-semibold">No active listings found</h2>
+          <p className="mt-2 text-gray-600">
+            There are currently no active businesses associated with this brand.
+          </p>
           <Link
-            key={business.id}
-            href={`/listings/${business.slug}`}
-            className="rounded-xl border p-4 hover:shadow"
+            href="/brands"
+            className="mt-4 inline-block text-blue-700 underline"
           >
-            <h2 className="font-semibold">
-              {business.name}
-            </h2>
-
-            <p className="text-sm text-gray-600">
-              <MapPin className="inline-block" /> 
-              {business.address}
-            </p>
-
-            <p className="mt-2 text-sm">
-              <Star className="inline-block fill-yellow-400 text-yellow-400" /> {business.rating ?? 'No rating'}
-            </p>
+            Browse other brands
           </Link>
-        ))}
-      </div>
+        </section>
+      ) : (
+        <section
+          aria-label={`${brandData.name} suppliers`}
+          className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {businesses.map((business) => (
+            <article key={business.id} className="rounded-xl border p-5">
+              <h2 className="text-lg font-semibold">
+                <Link
+                  href={`/listings/${business.slug}`}
+                  className="hover:text-blue-700 hover:underline"
+                >
+                  {business.name}
+                </Link>
+              </h2>
+
+              <p className="mt-3 flex items-start gap-2 text-sm text-gray-600">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  {business.address && <>{business.address}, </>}
+                  {business.city}, {business.province}
+                </span>
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-3 text-sm">
+                {business.phone && (
+                  <a
+                    href={`tel:${business.phone}`}
+                    className="font-medium text-blue-700 hover:underline"
+                  >
+                    Call business
+                  </a>
+                )}
+                {business.website && (
+                  <a
+                    href={business.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-blue-700 hover:underline"
+                  >
+                    Website
+                  </a>
+                )}
+                <Link
+                  href={`/listings/${business.slug}`}
+                  className="font-medium text-blue-700 hover:underline"
+                >
+                  View details
+                </Link>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
     </main>
   )
 }

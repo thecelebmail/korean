@@ -43,26 +43,7 @@ export default function ContactPage() {
             </a>
           </div>
 
-          {/* Phone */}
-          <div className="rounded-xl border p-5">
-            <Phone className="h-8 w-8 text-green-600" />
-
-            <h2 className="mt-4 text-xl font-semibold">
-              Phone / WhatsApp
-            </h2>
-
-            <p className="mt-2 text-sm text-gray-600">
-              Contact us directly for urgent
-              listing corrections or claims.
-            </p>
-
-            <a
-              href="tel:+27733819701"
-              className="mt-4 block text-blue-600 underline"
-            >
-              +27 73 381 9701
-            </a>
-          </div>
+        
 
           {/* Coverage */}
           <div className="rounded-xl border p-5">
