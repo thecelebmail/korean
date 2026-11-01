@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -9,7 +8,25 @@ type Props = {
   params: Promise<{ category: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+type Business = {
+  id: string
+  name: string
+  slug: string
+  address: string | null
+  city: string
+  province: string
+  phone: string | null
+  website: string | null
+}
+
+export const revalidate = 3600
+
+const SITE_URL = 'https://koreanmotorsparesnearme.co.za'
+const PAGE_SIZE = 100
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
   const { category } = await params
   const supabase = await createClient()
 
@@ -26,16 +43,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  const title = `${data.name} Suppliers in South Africa`
+  const description = `Browse motor spares businesses listed under ${data.name} in South Africa. Check available business details and contact suppliers directly.`
+  const canonical = `${SITE_URL}/categories/${category}`
+
   return {
-    title: `${data.name} Suppliers in South Africa`,
-    description: `Browse motor spares businesses listed under ${data.name} in South Africa. Check available business details and contact suppliers directly.`,
-    alternates: {
-      canonical: `https://koreanmotorsparesnearme.co.za/categories/${category}`,
-    },
+    title,
+    description,
+    alternates: { canonical },
     openGraph: {
-      title: `${data.name} Suppliers in South Africa`,
-      description: `Browse businesses listed under ${data.name} in South Africa.`,
-      url: `https://koreanmotorsparesnearme.co.za/categories/${category}`,
+      title,
+      description,
+      url: canonical,
       type: 'website',
     },
   }
@@ -69,19 +88,14 @@ export default async function CategoryPage({ params }: Props) {
   }
 
   const businessIds = [
-    ...new Set((links ?? []).map((link) => link.business_id).filter(Boolean)),
+    ...new Set(
+      (links ?? [])
+        .map((link) => link.business_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
   ]
 
-  let businesses: {
-    id: string
-    name: string
-    slug: string
-    address: string | null
-    city: string
-    province: string
-    phone: string | null
-    website: string | null
-  }[] = []
+  let businesses: Business[] = []
 
   if (businessIds.length > 0) {
     const { data, error } = await supabase
@@ -91,54 +105,65 @@ export default async function CategoryPage({ params }: Props) {
       .eq('status', 'active')
       .is('deleted_at', null)
       .order('name')
-      .limit(100)
+      .limit(PAGE_SIZE)
 
     if (error) {
-      console.error('Failed to load businesses:', error.message)
+      console.error('Failed to load category businesses:', error.message)
       throw new Error('Unable to load category listings.')
     }
 
-    businesses = data ?? []
+    businesses = (data ?? []) as Business[]
   }
+
+  const limitReached = businesses.length === PAGE_SIZE
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-gray-500">
-        <Link href="/" className="hover:underline">Home</Link>
+        <Link href="/" className="hover:underline">
+          Home
+        </Link>
         {' / '}
-        <Link href="/categories" className="hover:underline">Categories</Link>
+        <Link href="/categories" className="hover:underline">
+          Categories
+        </Link>
         {' / '}
         <span>{categoryData.name}</span>
       </nav>
 
       <header className="max-w-3xl">
         <h1 className="text-3xl font-bold md:text-4xl">
-          {categoryData.name}
+          {categoryData.name} Motor Spares
         </h1>
+
         <p className="mt-4 leading-7 text-gray-600">
           Browse South African motor spares businesses associated with{' '}
-          {categoryData.name}. Check each listing for its available location
-          and contact details, then confirm stock and compatibility directly
-          with the supplier.
+          {categoryData.name}. Check each listing for its location and contact
+          details, then confirm stock availability, compatibility, and pricing
+          directly with the supplier.
         </p>
       </header>
 
       <p className="mt-6 text-sm text-gray-500">
-        {businesses.length} {businesses.length === 1 ? 'listing' : 'listings'} shown
-        {businesses.length === 100 ? ' (maximum displayed on this page)' : ''}.
+        Showing {businesses.length}{' '}
+        {businesses.length === 1 ? 'listing' : 'listings'}
+        {limitReached ? ' (display limit reached)' : ''}.
       </p>
 
       {businesses.length === 0 ? (
         <section className="mt-8 rounded-xl border p-6">
           <h2 className="text-lg font-semibold">No active listings found</h2>
+
           <p className="mt-2 text-gray-600">
             There are currently no active businesses listed in this category.
             You can browse other categories or search the directory.
           </p>
+
           <div className="mt-4 flex flex-wrap gap-4">
             <Link href="/categories" className="text-blue-700 underline">
               Browse categories
             </Link>
+
             <Link href="/search" className="text-blue-700 underline">
               Search businesses
             </Link>
@@ -169,24 +194,6 @@ export default async function CategoryPage({ params }: Props) {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-3 text-sm">
-                {business.phone && (
-                  <a
-                    href={`tel:${business.phone}`}
-                    className="font-medium text-blue-700 hover:underline"
-                  >
-                    Call business
-                  </a>
-                )}
-                {business.website && (
-                  <a
-                    href={business.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-blue-700 hover:underline"
-                  >
-                    Website
-                  </a>
-                )}
                 <Link
                   href={`/listings/${business.slug}`}
                   className="font-medium text-blue-700 hover:underline"
@@ -198,6 +205,15 @@ export default async function CategoryPage({ params }: Props) {
           ))}
         </section>
       )}
+
+      <div className="mt-10 border-t pt-6">
+        <Link
+          href="/categories"
+          className="text-sm font-medium text-blue-700 hover:underline"
+        >
+          ← All categories
+        </Link>
+      </div>
     </main>
   )
 }

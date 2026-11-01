@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -9,7 +8,25 @@ type Props = {
   params: Promise<{ brand: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+type Business = {
+  id: string
+  name: string
+  slug: string
+  address: string | null
+  city: string
+  province: string
+  phone: string | null
+  website: string | null
+}
+
+export const revalidate = 3600
+
+const SITE_URL = 'https://koreanmotorsparesnearme.co.za'
+const PAGE_SIZE = 100
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
   const { brand } = await params
   const supabase = await createClient()
 
@@ -26,16 +43,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  const title = `${data.name} Spares Suppliers in South Africa`
+  const description = `Browse businesses listed for ${data.name} motor spares in South Africa. Check supplier locations and contact details to confirm parts availability.`
+  const canonical = `${SITE_URL}/brands/${brand}`
+
   return {
-    title: `${data.name} Spares Suppliers in South Africa`,
-    description: `Browse businesses listed for ${data.name} motor spares in South Africa. Check supplier locations and contact details to confirm parts availability.`,
-    alternates: {
-      canonical: `https://koreanmotorsparesnearme.co.za/brands/${brand}`,
-    },
+    title,
+    description,
+    alternates: { canonical },
     openGraph: {
-      title: `${data.name} Spares Suppliers in South Africa`,
-      description: `Browse listed suppliers and their contact details for ${data.name} spares.`,
-      url: `https://koreanmotorsparesnearme.co.za/brands/${brand}`,
+      title,
+      description,
+      url: canonical,
       type: 'website',
     },
   }
@@ -69,19 +88,14 @@ export default async function BrandPage({ params }: Props) {
   }
 
   const businessIds = [
-    ...new Set((links ?? []).map((link) => link.business_id).filter(Boolean)),
+    ...new Set(
+      (links ?? [])
+        .map((link) => link.business_id)
+        .filter((id): id is string => Boolean(id)),
+    ),
   ]
 
-  let businesses: {
-    id: string
-    name: string
-    slug: string
-    address: string | null
-    city: string
-    province: string
-    phone: string | null
-    website: string | null
-  }[] = []
+  let businesses: Business[] = []
 
   if (businessIds.length > 0) {
     const { data, error } = await supabase
@@ -91,22 +105,28 @@ export default async function BrandPage({ params }: Props) {
       .eq('status', 'active')
       .is('deleted_at', null)
       .order('name')
-      .limit(100)
+      .limit(PAGE_SIZE)
 
     if (error) {
       console.error('Failed to load brand businesses:', error.message)
       throw new Error('Unable to load brand listings.')
     }
 
-    businesses = data ?? []
+    businesses = (data ?? []) as Business[]
   }
+
+  const limitReached = businesses.length === PAGE_SIZE
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-gray-500">
-        <Link href="/" className="hover:underline">Home</Link>
+        <Link href="/" className="hover:underline">
+          Home
+        </Link>
         {' / '}
-        <Link href="/brands" className="hover:underline">Brands</Link>
+        <Link href="/brands" className="hover:underline">
+          Brands
+        </Link>
         {' / '}
         <span>{brandData.name}</span>
       </nav>
@@ -115,6 +135,7 @@ export default async function BrandPage({ params }: Props) {
         <h1 className="text-3xl font-bold md:text-4xl">
           {brandData.name} Spares Suppliers
         </h1>
+
         <p className="mt-4 leading-7 text-gray-600">
           Browse businesses associated with {brandData.name} spares. Contact
           a supplier to check availability, vehicle compatibility, condition,
@@ -123,16 +144,20 @@ export default async function BrandPage({ params }: Props) {
       </header>
 
       <p className="mt-6 text-sm text-gray-500">
-        {businesses.length} {businesses.length === 1 ? 'listing' : 'listings'} shown
-        {businesses.length === 100 ? ' (maximum displayed on this page)' : ''}.
+        Showing {businesses.length}{' '}
+        {businesses.length === 1 ? 'listing' : 'listings'}
+        {limitReached ? ' (display limit reached)' : ''}.
       </p>
 
       {businesses.length === 0 ? (
         <section className="mt-8 rounded-xl border p-6">
           <h2 className="text-lg font-semibold">No active listings found</h2>
+
           <p className="mt-2 text-gray-600">
-            There are currently no active businesses associated with this brand.
+            There are currently no active businesses associated with this
+            brand.
           </p>
+
           <Link
             href="/brands"
             className="mt-4 inline-block text-blue-700 underline"
@@ -165,24 +190,7 @@ export default async function BrandPage({ params }: Props) {
               </p>
 
               <div className="mt-4 flex flex-wrap gap-3 text-sm">
-                {business.phone && (
-                  <a
-                    href={`tel:${business.phone}`}
-                    className="font-medium text-blue-700 hover:underline"
-                  >
-                    Call business
-                  </a>
-                )}
-                {business.website && (
-                  <a
-                    href={business.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-blue-700 hover:underline"
-                  >
-                    Website
-                  </a>
-                )}
+
                 <Link
                   href={`/listings/${business.slug}`}
                   className="font-medium text-blue-700 hover:underline"
@@ -194,6 +202,15 @@ export default async function BrandPage({ params }: Props) {
           ))}
         </section>
       )}
+
+      <div className="mt-10 border-t pt-6">
+        <Link
+          href="/brands"
+          className="text-sm font-medium text-blue-700 hover:underline"
+        >
+          ← All vehicle brands
+        </Link>
+      </div>
     </main>
   )
 }
