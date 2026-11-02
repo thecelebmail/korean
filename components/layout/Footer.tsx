@@ -5,10 +5,10 @@ import Image from 'next/image'
 
 export function Footer() {
   return (
-    <footer className="bg-stone-900 text-stone-300 mt-20">
+    <footer className="bg-stone-50 text-stone-300 mt-20">
          <div className="w-full overflow-hidden">
          <Image
-            src="/logo-footer.png"
+            src="/logo-footer.webp"
             alt="Korean Motor Spares"
             width={1600}
             height={100}

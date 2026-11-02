@@ -111,7 +111,7 @@ export default function Hero() {
               <div>
                 <p className="leading-7 text-stone-600">
                   Search for Korean motor spares near you including
-                  Hyundai, Kia, Daewoo, SsangYong, and Chevrolet parts.
+                  Hyundai, Kia, Daewoo, SsangYong parts & many more.
                   Browse suppliers by city, province, category, or brand.
                 </p>
 
