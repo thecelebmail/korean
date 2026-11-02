@@ -36,7 +36,7 @@ export function Navbar() {
           className="flex shrink-0 items-center"
         >
           <Image
-            src="/korean-logo.webp"
+            src="/korean-loogo.webp"
             alt="Korean Motor Spares"
             width={180}
             height={70}
